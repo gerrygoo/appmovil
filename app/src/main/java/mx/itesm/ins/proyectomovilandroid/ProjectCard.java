@@ -2,6 +2,7 @@ package mx.itesm.ins.proyectomovilandroid;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.service.quicksettings.Tile;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.Serializable;
@@ -43,6 +45,9 @@ public class ProjectCard extends Fragment {
     private TextView Location;
     private Button Accept;
     private Button Decline;
+    private ProgressBar progressBar;
+
+    private boolean shouldPutImage;
 
     private OnFragmentInteractionListener mListener;
 
@@ -54,6 +59,7 @@ public class ProjectCard extends Fragment {
         ProjectCard fragment = new ProjectCard();
         Bundle args = new Bundle();
         args.putParcelable(ARG_PROJECT, project);
+        fragment.shouldPutImage = false;
         fragment.setArguments(args);
         return fragment;
     }
@@ -63,6 +69,17 @@ public class ProjectCard extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             project = getArguments().getParcelable(ARG_PROJECT);
+            project.setImageListener(new ImageListener() {
+                @Override
+                public void onImageAvailable(Bitmap image) {
+                    if(Logo ==  null){
+                        shouldPutImage = true;
+                        return;
+                    }
+                    Logo.setImageBitmap(image);
+                    progressBar.setVisibility(View.GONE);
+                }
+            });
         }
     }
 
@@ -80,6 +97,7 @@ public class ProjectCard extends Fragment {
         Location = result.findViewById(R.id.projectCard_Location);
         Accept = result.findViewById(R.id.projectCard_Accept);
         Decline = result.findViewById(R.id.projectCard_Decline);
+        progressBar = result.findViewById(R.id.projectCard_ProgressBar);
 
         InitializeCard();
         return result;
@@ -87,7 +105,10 @@ public class ProjectCard extends Fragment {
 
     private void InitializeCard() {
         Title.setText(project.getTitle());
-        //Logo.setImageBitmap(project.getImage());
+        if(shouldPutImage) {
+            Logo.setImageBitmap(project.getImage());
+            progressBar.setVisibility(View.GONE);
+        }
         StartDate.setText(DateFormat.getDateFormat(getContext()).format(project.getStartDate()));
         Duration.setText(DateFormat.getDateFormat(getContext()).format(project.getEndDate()));
         Positions.setText(Arrays.toString(project.getPositions()));

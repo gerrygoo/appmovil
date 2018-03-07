@@ -2,15 +2,12 @@ package mx.itesm.ins.proyectomovilandroid;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.ImageReader;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
@@ -29,6 +26,8 @@ public class Project implements Parcelable{
     private String Location;
     private Date StartDate;
     private Date EndDate;
+
+    private ImageListener imageListener;
 
     private Boolean finishLoadingImage;
 
@@ -87,14 +86,6 @@ public class Project implements Parcelable{
         }
     }
 
-    public boolean canGetBitmap(){
-        return finishLoadingImage;
-    }
-
-    public void requestBitmap(){
-        //BooleanChangeListener
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -122,6 +113,16 @@ public class Project implements Parcelable{
         protected void onPostExecute(Bitmap bitmap) {
             Image = bitmap;
             finishLoadingImage = true;
+            if(imageListener != null){
+                imageListener.onImageAvailable(bitmap);
+            }
+        }
+    }
+
+    public void setImageListener(ImageListener imageListener){
+        this.imageListener = imageListener;
+        if(finishLoadingImage){
+            imageListener.onImageAvailable(this.Image);
         }
     }
 
