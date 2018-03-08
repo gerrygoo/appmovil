@@ -18,4 +18,9 @@
         completions."
     </string>
     <string name="forgot_password_str">Forgot password</string>
+    <string name="action_not_registered">Not a member?</string>
+    <string name="title_activity_signup_screen">Sign in</string>
+    <string name="propmt_email_confirm">Email (confirm)</string>
+    <string name="prompt_password_hint">Password</string>
+    <string name="prompt_password_confirm_hint">Password (Confirm)</string>
 </resources>
