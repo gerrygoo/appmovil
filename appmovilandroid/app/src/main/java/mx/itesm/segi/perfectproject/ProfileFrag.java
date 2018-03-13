@@ -15,8 +15,8 @@ import android.widget.EditText;
 public class ProfileFrag extends Fragment {
 
     private EditText tvName;
-    private EditText tvEmail;
-    private EditText tvAbilities;
+    private EditText tvCompany;
+    private EditText tvCurriculum;
     public ProfileFrag() {
         // Required empty public constructor
     }
@@ -28,15 +28,16 @@ public class ProfileFrag extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
         tvName = v.findViewById(R.id.tvName);
-        tvEmail = v.findViewById(R.id.tvEmail);
-        tvAbilities = v.findViewById(R.id.tvAbilities);
+        tvCompany = v.findViewById(R.id.tvCompany);
+        tvCurriculum = v.findViewById(R.id.etCurriculum);
+        tvCurriculum.setKeyListener(null);
         loadProfileInfo();
         return v;
     }
 
     private void loadProfileInfo() {
         tvName.setText(getArguments().getString("name"));
-        tvEmail.setText(getArguments().getString("email"));
-        tvAbilities.setText(getArguments().getString("abilities"));
+        tvCompany.setText(getArguments().getString("company"));
+        tvCurriculum.setText(getArguments().getString("curriculum"));
     }
 }

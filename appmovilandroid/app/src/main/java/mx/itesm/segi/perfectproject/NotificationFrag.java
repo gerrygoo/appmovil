@@ -43,7 +43,8 @@ public class NotificationFrag extends Fragment {
         String[] titles = getArguments().getStringArray("titles");
         String[] descriptions = getArguments().getStringArray("descriptions");
         String[] dates = getArguments().getStringArray("dates");
-        AdapterRV adapterRV = new AdapterRV(titles, descriptions, dates);
+        boolean[] news = getArguments().getBooleanArray("news");
+        AdapterRV adapterRV = new AdapterRV(titles, descriptions, dates, news);
         rvNotifications.setAdapter(adapterRV);
     }
 

@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 public class MainScreenActivity extends AppCompatActivity {
@@ -21,8 +22,8 @@ public class MainScreenActivity extends AppCompatActivity {
                 case R.id.navigation_profile:
                     Bundle argsProfile = new Bundle();
                     argsProfile.putString("name", "Willy Wonka");
-                    argsProfile.putString("email", "willy.wonka@gmail.com");
-                    argsProfile.putString("abilities", "Developer, Designer, Project Manager");
+                    argsProfile.putString("company", "Chocolate Factory");
+                    argsProfile.putString("curriculum", "Developer, Designer, Project Manager");
                     Fragment profile = new ProfileFrag();
                     profile.setArguments(argsProfile);
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).commit();
@@ -47,6 +48,7 @@ public class MainScreenActivity extends AppCompatActivity {
                     argNotifications.putStringArray("dates", new String[]{Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString()});
                     argNotifications.putStringArray("titles", new String[]{"Notification 1", "Notification 2", "Notification 3"});
                     argNotifications.putStringArray("descriptions", new String[]{"Description 1", "Description 2", "Description 3"});
+                    argNotifications.putBooleanArray("news", new boolean[]{true, false, true});
                     Fragment notifications = new NotificationFrag();
                     notifications.setArguments(argNotifications);
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, notifications).commit();

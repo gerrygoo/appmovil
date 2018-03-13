@@ -10,4 +10,7 @@
     <string name="str_name">Name</string>
     <string name="str_email">Email</string>
     <string name="str_abilities">Abilities</string>
+    <string name="str_employer">Employer</string>
+    <string name="str_curriculum">Curriculum</string>
+    <string name="str_company">Company</string>
 </resources>
