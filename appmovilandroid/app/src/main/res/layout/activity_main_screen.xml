@@ -8,7 +8,7 @@
     tools:context="mx.itesm.segi.perfectproject.MainScreenActivity">
 
     <FrameLayout
-        android:id="@+id/fragmentPlacer"
+        android:id="@+id/fragmentPlacerLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
@@ -19,6 +19,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/fragmentPlacerBottom"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/fragmentPlacerTop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </android.support.constraint.ConstraintLayout>
 
     </FrameLayout>
 
