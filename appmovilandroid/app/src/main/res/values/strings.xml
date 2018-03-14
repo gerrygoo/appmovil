@@ -1,4 +1,18 @@
 <resources>
+    <string name="navigation_profile">Profile</string>
+    <string name="navigation_browse">Browse</string>
+    <string name="navigation_notifications">Notifications</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="str_notification">Notification</string>
+    <string name="str_ok">Ok</string>
+    <string name="str_name">Name</string>
+    <string name="str_email">Email</string>
+    <string name="str_abilities">Abilities</string>
+    <string name="str_employer">Employer</string>
+    <string name="str_curriculum">Curriculum</string>
+    <string name="str_company">Company</string>
+
     <string name="app_name">PerfectProject</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
