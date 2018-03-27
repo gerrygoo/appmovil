@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Switch;
 
 
 /**
@@ -17,6 +18,8 @@ public class ProfileFrag extends Fragment {
     private EditText tvName;
     private EditText tvCompany;
     private EditText tvCurriculum;
+    private Switch Mode;
+
     public ProfileFrag() {
         // Required empty public constructor
     }
@@ -31,6 +34,7 @@ public class ProfileFrag extends Fragment {
         tvCompany = v.findViewById(R.id.tvCompany);
         tvCurriculum = v.findViewById(R.id.etCurriculum);
         tvCurriculum.setKeyListener(null);
+        Mode = v.findViewById(R.id.sEmployer);
         loadProfileInfo();
         return v;
     }

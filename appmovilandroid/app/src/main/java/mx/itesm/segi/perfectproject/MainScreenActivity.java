@@ -1,25 +1,18 @@
 package mx.itesm.segi.perfectproject;
 
-import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.DragEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.widget.TextView;
 
-import java.util.Arrays;
 import java.util.Calendar;
 
 public class MainScreenActivity extends AppCompatActivity {
@@ -51,7 +44,7 @@ public class MainScreenActivity extends AppCompatActivity {
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerBottom, microsoft).commit();
                     return true;
                 case R.id.navigation_notifications:
-                    Bundle argNotifications = new Bundle();
+                    /*Bundle argNotifications = new Bundle();
                     argNotifications.putStringArray("dates", new String[]{Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString()});
                     argNotifications.putStringArray("titles", new String[]{"Notification 1", "Notification 2", "Notification 3"});
                     argNotifications.putStringArray("descriptions", new String[]{"Description 1", "Description 2", "Description 3"});
@@ -59,6 +52,9 @@ public class MainScreenActivity extends AppCompatActivity {
                     Fragment notifications = new NotificationFrag();
                     notifications.setArguments(argNotifications);
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerTop, notifications).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerBottom, emptyFrag).commit();*/
+                    Fragment newProject = new CreateProject();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerTop, newProject).commit();
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerBottom, emptyFrag).commit();
                     return true;
             }
