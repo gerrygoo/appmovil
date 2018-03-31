@@ -3,11 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Ian\6thSemester\AppMovil\appmovilandroid\appmovilandroid\app\app.iml" filepath="C:\Ian\6thSemester\AppMovil\appmovilandroid\appmovilandroid\app\app.iml" />
-      <module fileurl="file://D:\DesarrolloApps\appmovilandroid\appmovilandroid\app\app.iml" filepath="D:\DesarrolloApps\appmovilandroid\appmovilandroid\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/appmovilandroid.iml" filepath="$PROJECT_DIR$/appmovilandroid.iml" />
-      <module fileurl="file://D:\DesarrolloApps\appmovilandroid\appmovilandroid\appmovilandroid.iml" filepath="D:\DesarrolloApps\appmovilandroid\appmovilandroid\appmovilandroid.iml" />
-      <module fileurl="file://C:\Ian\6thSemester\AppMovil\appmovilandroid\appmovilandroid\appmovilandroid.iml" filepath="C:\Ian\6thSemester\AppMovil\appmovilandroid\appmovilandroid\appmovilandroid.iml" />
     </modules>
   </component>
 </project>
