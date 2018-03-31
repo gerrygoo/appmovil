@@ -12,53 +12,27 @@ import android.view.DragEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import java.util.Calendar;
 
-public class MainScreenActivity extends AppCompatActivity {
+public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener {
 
     private final long duration = 100;
+    private final boolean EMPLOYEE = false, EMPLOYER = true;
+    private final int INITIAL_MENU_ITEM = 1;
     private float startingX, startingY, initialTouchX, initialTouchY;
+    private boolean accountMode = EMPLOYEE;
+    private Fragment[] activeFragments;
+    private View[] views;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            Fragment emptyFrag = new Fragment();
-            switch (item.getItemId()) {
-                case R.id.navigation_profile:
-                    Bundle argsProfile = new Bundle();
-                    argsProfile.putString("name", "Willy Wonka");
-                    argsProfile.putString("company", "Chocolate Factory");
-                    argsProfile.putString("curriculum", "Developer, Designer, Project Manager");
-                    Fragment profile = new ProfileFrag();
-                    profile.setArguments(argsProfile);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerTop, profile).commit();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerBottom, emptyFrag).commit();
-                    return true;
-                case R.id.navigation_browse:
-                    Fragment google  = GoogleCard();
-                    Fragment microsoft  = MicrosoftCard();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerTop, google).commit();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerBottom, microsoft).commit();
-                    return true;
-                case R.id.navigation_notifications:
-                    /*Bundle argNotifications = new Bundle();
-                    argNotifications.putStringArray("dates", new String[]{Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString()});
-                    argNotifications.putStringArray("titles", new String[]{"Notification 1", "Notification 2", "Notification 3"});
-                    argNotifications.putStringArray("descriptions", new String[]{"Description 1", "Description 2", "Description 3"});
-                    argNotifications.putBooleanArray("news", new boolean[]{true, false, true});
-                    Fragment notifications = new NotificationFrag();
-                    notifications.setArguments(argNotifications);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerTop, notifications).commit();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerBottom, emptyFrag).commit();*/
-                    Fragment newProject = new CreateProject();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerTop, newProject).commit();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerBottom, emptyFrag).commit();
-                    return true;
-            }
-            return false;
+            return handleNavigation(item.getItemId());
         }
     };
 
@@ -67,7 +41,7 @@ public class MainScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
-        final View draggableView = findViewById(R.id.fragmentPlacerTop);
+        final View draggableView = findViewById(R.id.fragmentPlacerDraggable);
         draggableView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, final MotionEvent motionEvent) {
@@ -85,9 +59,6 @@ public class MainScreenActivity extends AppCompatActivity {
                     initialTouchY = motionEvent.getRawY() - coordinates[1];
 
                     draggableView.startDragAndDrop(null, new PointDragShadowBuilder(draggableView, motionEvent.getX(), motionEvent.getY()), null, View.DRAG_FLAG_OPAQUE);
-                    //draggableView.startDragAndDrop(null, null, null, View.DRAG_FLAG_OPAQUE);
-                    //draggableView.setVisibility(View.GONE);
-
                     return true;
                 }
                 return false;
@@ -95,16 +66,10 @@ public class MainScreenActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.container).setOnDragListener(new View.OnDragListener() {
-
-
             @Override
             public boolean onDrag(View view, DragEvent dragEvent) {
                 switch (dragEvent.getAction()){
                     case DragEvent.ACTION_DRAG_ENDED:
-
-//                        draggableView.setVisibility(View.VISIBLE);
-//                        draggableView.setX(lastTouchX - initialTouchX);
-//                        draggableView.setY(lastTouchY - initialTouchY);
 
                         ObjectAnimator moveX = ObjectAnimator.ofFloat(draggableView, "translationX",startingX);
                         ObjectAnimator moveY = ObjectAnimator.ofFloat(draggableView, "translationY", startingY);
@@ -125,8 +90,16 @@ public class MainScreenActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        renderBrowse();
+        views = new View[]{
+                findViewById(R.id.fragmentPlacer),
+                findViewById(R.id.fragmentPlacerDraggable),
+        };
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation.getMenu().getItem(INITIAL_MENU_ITEM).setChecked(true);
     }
 
     private Fragment GoogleCard(){
@@ -167,5 +140,95 @@ public class MainScreenActivity extends AppCompatActivity {
         );
         card.setArguments(args);
         return card;
+    }
+
+    private boolean handleNavigation(int id){
+        clearFragments();
+        switch (id) {
+            case R.id.navigation_profile:
+                usingFragments();
+                renderProfile();
+                return true;
+            case R.id.navigation_browse:
+                if(accountMode == EMPLOYEE) {
+                    usingFragments(true);
+                    renderBrowse();
+                }else {
+                    usingFragments();
+                    renderNotifications();
+                }
+                return true;
+            case R.id.navigation_notifications:
+                usingFragments();
+                if(accountMode == EMPLOYEE) {
+                    renderNotifications();
+                } else {
+                    renderCreateProject();
+                }
+                return true;
+        }
+        return false;
+    }
+
+    private void renderProfile(){
+        Bundle argsProfile = new Bundle();
+        argsProfile.putString("name", "Willy Wonka");
+        argsProfile.putString("company", "Chocolate Factory");
+        argsProfile.putString("curriculum", "Developer, Designer, Project Manager");
+        argsProfile.putBoolean("mode", accountMode);
+        Fragment profile = new ProfileFrag();
+        profile.setArguments(argsProfile);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).commit();
+        activeFragments = new Fragment[]{profile};
+    }
+
+    private void renderBrowse(){
+        Fragment google  = GoogleCard();
+        Fragment microsoft  = MicrosoftCard();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerDraggable, google).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, microsoft).commit();
+        activeFragments = new Fragment[]{google, microsoft};
+    }
+
+    private void renderCreateProject(){
+        Fragment newProject = new CreateProject();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, newProject).commit();
+        activeFragments = new Fragment[]{newProject};
+    }
+
+    private void renderNotifications(){
+        Bundle argNotifications = new Bundle();
+        argNotifications.putStringArray("dates", new String[]{Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString()});
+        argNotifications.putStringArray("titles", new String[]{"Notification 1", "Notification 2", "Notification 3"});
+        argNotifications.putStringArray("descriptions", new String[]{"Description 1", "Description 2", "Description 3"});
+        argNotifications.putBooleanArray("news", new boolean[]{true, false, true});
+        Fragment notifications = new NotificationFrag();
+        notifications.setArguments(argNotifications);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, notifications).commit();
+    }
+
+    private void usingFragments(){
+        findViewById(R.id.fragmentPlacer).setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    private void usingFragments(boolean draggable){
+        findViewById(R.id.fragmentPlacer).setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if(draggable) {
+            findViewById(R.id.fragmentPlacerDraggable).setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+    }
+
+    private void clearFragments(){
+        for(Fragment f: activeFragments) {
+            getSupportFragmentManager().beginTransaction().remove(f).commit();
+        }
+        for(View v: views){
+            v.setLayoutParams(new FrameLayout.LayoutParams(0, 0));
+        }
+    }
+
+    @Override
+    public void OnSwitchToggle(boolean value) {
+        accountMode = value;
     }
 }

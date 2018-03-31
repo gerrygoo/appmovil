@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:layout_margin="15dp"
     android:background="@drawable/card_edge"
+    android:elevation="0dp"
     tools:context="mx.itesm.segi.perfectproject.ProjectCard">
 
     <!-- TODO: Update blank fragment layout -->
@@ -13,13 +14,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="1dp"
-        app:cardCornerRadius="10dp">
+        android:elevation="0dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp"
             android:background="@android:color/transparent"
+            android:elevation="10dp"
             android:orientation="vertical">
 
             <LinearLayout
