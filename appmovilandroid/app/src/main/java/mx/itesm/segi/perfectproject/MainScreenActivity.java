@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.DragEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -342,5 +343,19 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     @Override
     public void OnSwitchToggle(boolean value) {
         accountMode = value;
+
+        BottomNavigationView navigation = findViewById(R.id.navigation);
+        Menu menu = navigation.getMenu();
+        if(accountMode == EMPLOYEE){
+            menu.getItem(1).setIcon(R.drawable.ic_home_black_24dp);
+            menu.getItem(1).setTitle(R.string.navigation_browse);
+            menu.getItem(2).setIcon(R.drawable.ic_notifications_black_24dp);
+            menu.getItem(2).setTitle(R.string.navigation_notifications);
+        }else {
+            menu.getItem(1).setIcon(R.drawable.ic_work_black_24dp);
+            menu.getItem(1).setTitle(R.string.navigation_my_projects);
+            menu.getItem(2).setIcon(R.drawable.ic_add_black_24dp);
+            menu.getItem(2).setTitle(R.string.navigation_create_project);
+        }
     }
 }
