@@ -1,13 +1,17 @@
 package mx.itesm.segi.perfectproject;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Choreographer;
 import android.view.DragEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -17,7 +21,7 @@ import android.widget.FrameLayout;
 
 import java.util.Calendar;
 
-public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener {
+public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener{
 
     private final long duration = 100;
     private final boolean EMPLOYEE = false, EMPLOYER = true;
@@ -26,6 +30,20 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     private boolean accountMode = EMPLOYEE;
     private Fragment[] activeFragments;
     private View[] views;
+
+    private int currentProject = 0;
+    private final Project[] projects = new Project[]{
+            MicrosoftProject(),
+            GoogleProject(),
+            MicrosoftProject(),
+            GoogleProject(),
+            MicrosoftProject(),
+            GoogleProject(),
+            MicrosoftProject(),
+            GoogleProject(),
+            MicrosoftProject(),
+            GoogleProject()
+    };
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -71,14 +89,19 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
                 switch (dragEvent.getAction()){
                     case DragEvent.ACTION_DRAG_ENDED:
 
-                        ObjectAnimator moveX = ObjectAnimator.ofFloat(draggableView, "translationX",startingX);
-                        ObjectAnimator moveY = ObjectAnimator.ofFloat(draggableView, "translationY", startingY);
+                        animateDragTo(startingX, startingY);
 
-                        AnimatorSet set = new AnimatorSet();
-                        set.playTogether(moveX,moveY);
-                        set.setDuration(duration);
+                        float deltaX = draggableView.getX() - startingX;
+                        float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
 
-                        set.start();
+                        Log.i("DELTA X", deltaX + "");
+
+                        if(deltaX > screenWidth/3){
+                            handleYes();
+                        } else if(deltaX < -screenWidth/3 ){
+                            handleNo();
+                        }
+
                         break;
                     case DragEvent.ACTION_DROP:
                         break;
@@ -102,44 +125,42 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         navigation.getMenu().getItem(INITIAL_MENU_ITEM).setChecked(true);
     }
 
-    private Fragment GoogleCard(){
+    private Fragment projectToCard(Project project){
         Fragment card = new ProjectCard();
         Bundle args = new Bundle();
+        args.putParcelable(ProjectCard.ARG_PROJECT, project);
+        card.setArguments(args);
+        return card;
+    }
+
+    private Project GoogleProject(){
         Calendar endDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 10);
-        args.putParcelable(ProjectCard.ARG_PROJECT,new Project(
+        return new Project(
                 "Smart Cars",
                 "https://pmcvariety.files.wordpress.com/2015/08/google-placeholder-logo.jpg?w=1000&h=563&crop=1",
                 new String[]{ "Programmer", "Product Manager", "Experience Designer" },
                 "The project focuses on building a self driving car, in which you are required to know Machine Learning and Artificial Intelligence Algorithms in order to be eligible for this project",
                 "Mountain View, California, United States",
                 Calendar.getInstance().getTime(),
-                endDate.getTime())
-        );
-        card.setArguments(args);
-        return card;
+                endDate.getTime());
     }
 
-    private Fragment MicrosoftCard(){
-        Fragment card = new ProjectCard();
-        Bundle args = new Bundle();
+    private Project MicrosoftProject(){
         Calendar endDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 18);
 
         Calendar startDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 8);
 
-        args.putParcelable(ProjectCard.ARG_PROJECT,new Project(
+        return new Project(
                 "Cortana Search",
                 "https://mspoweruser.com/wp-content/uploads/2016/09/Webgroesse_HighRes_Microsoft12711.jpg",
                 new String[]{ "Programmer", "Program Manager", "Tester" },
                 "This project focuses on implementing a Natural Language search for Cortana, for this we require that you have knowledge and background on Natural Language Processing or Artificial Intelligence",
                 "Redmond, Washington, United States",
                 startDate.getTime(),
-                endDate.getTime())
-        );
-        card.setArguments(args);
-        return card;
+                endDate.getTime());
     }
 
     private boolean handleNavigation(int id){
@@ -183,11 +204,24 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void renderBrowse(){
-        Fragment google  = GoogleCard();
-        Fragment microsoft  = MicrosoftCard();
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerDraggable, google).commit();
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, microsoft).commit();
-        activeFragments = new Fragment[]{google, microsoft};
+        renderCards(currentProject, currentProject+1);
+    }
+
+    private void renderCards(int first, int second){
+        Fragment top, bottom;
+        if(first < projects.length) {
+            top = projectToCard(projects[first]);
+        } else {
+            top = new Fragment();
+        }
+        if(second < projects.length) {
+            bottom = projectToCard(projects[second]);
+        } else {
+            bottom = new Fragment();
+        }
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerDraggable, top).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, bottom).commit();
+        activeFragments = new Fragment[]{top, bottom};
     }
 
     private void renderCreateProject(){
@@ -205,6 +239,84 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         Fragment notifications = new NotificationFrag();
         notifications.setArguments(argNotifications);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, notifications).commit();
+    }
+
+    private AnimatorSet animateDragTo(float x, float y){
+        View draggableView = findViewById(R.id.fragmentPlacerDraggable);
+
+        ObjectAnimator moveX = ObjectAnimator.ofFloat(draggableView, "translationX",x);
+        ObjectAnimator moveY = ObjectAnimator.ofFloat(draggableView, "translationY",y);
+
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(moveX,moveY);
+        set.setDuration(duration);
+
+        set.start();
+        return set;
+    }
+
+    public void handleYes(){
+        float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+        animateDragTo(+screenWidth, startingY).addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                changeCards();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+    }
+
+    public void handleNo(){
+        float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+        animateDragTo(-screenWidth, startingY).addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                changeCards();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+    }
+
+    private void changeCards(){
+        currentProject++;
+        renderCards(currentProject, currentProject);
+        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long l) {
+                View draggableView = findViewById(R.id.fragmentPlacerDraggable);
+                draggableView.setX(startingX);
+                draggableView.setY(startingY);
+                renderBrowse();
+            }
+        });
     }
 
     private void usingFragments(){

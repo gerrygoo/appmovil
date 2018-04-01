@@ -3,10 +3,7 @@ package mx.itesm.segi.perfectproject;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.service.quicksettings.Tile;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -16,10 +13,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
 
 /**
@@ -49,6 +42,7 @@ public class ProjectCard extends Fragment {
 
     private boolean shouldPutImage;
 
+    private OnCardButtonClickListener listener;
 
     public ProjectCard() {
         // Required empty public constructor
@@ -98,8 +92,33 @@ public class ProjectCard extends Fragment {
         Decline = result.findViewById(R.id.projectCard_Decline);
         progressBar = result.findViewById(R.id.projectCard_ProgressBar);
 
+        Accept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.handleYes();
+            }
+        });
+
+        Decline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.handleNo();
+            }
+        });
+
         InitializeCard();
         return result;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Activity activity = getActivity();
+        if(activity instanceof OnCardButtonClickListener){
+            listener = (OnCardButtonClickListener)activity;
+        } else {
+            throw new ClassCastException(activity.toString() + " must implement OnCardButtonClickListener");
+        }
     }
 
     private void InitializeCard() {
@@ -120,6 +139,10 @@ public class ProjectCard extends Fragment {
         }
         Positions.setText(positions.toString());
         Location.setText(project.getLocation());
+    }
 
+    public interface OnCardButtonClickListener {
+        void handleYes();
+        void handleNo();
     }
 }
