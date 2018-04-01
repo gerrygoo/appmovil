@@ -1,4 +1,4 @@
-package mx.itesm.segi.perfectproject;
+package Model;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,7 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+
+import mx.itesm.segi.perfectproject.ImageListener;
 
 /**
  * Created by ianne on 28/02/2018.
@@ -18,6 +21,8 @@ import java.util.Date;
 
 public class Project implements Parcelable{
 
+    private String UID;
+    private User Owner;
     private String Title;
     private Bitmap Image;
     private String ImageUrl;
@@ -26,6 +31,10 @@ public class Project implements Parcelable{
     private String Location;
     private Date StartDate;
     private Date EndDate;
+    private double Compensation;
+
+    private ArrayList<User> Applicants;
+    private ArrayList<User> Team;
 
     private ImageListener imageListener;
 
@@ -33,7 +42,9 @@ public class Project implements Parcelable{
 
     //private ImageReader.OnImageAvailableListener
 
-    public Project(String title, String imageUrl, String[] positions, String description,String location, Date startDate, Date endDate) {
+    public Project(String uid, User owner, String title, String imageUrl, String[] positions, String description,String location, Date startDate, Date endDate) {
+        UID = uid;
+        Owner = owner;
         Title = title;
         ImageUrl = imageUrl;
         Positions = positions;
@@ -41,6 +52,9 @@ public class Project implements Parcelable{
         Location = location;
         StartDate = startDate;
         EndDate = endDate;
+
+        Team = new ArrayList<>();
+        Applicants = new ArrayList<>();
 
         finishLoadingImage = false;
         new Project.DownloadImageFromURL().execute(imageUrl);
@@ -152,5 +166,44 @@ public class Project implements Parcelable{
 
     public Date getEndDate() {
         return EndDate;
+    }
+
+    public double getCompensation() {
+        return Compensation;
+    }
+
+    public ArrayList<User> getApplicants() {
+        return Applicants;
+    }
+
+    public void setApplicants(ArrayList<User> applicants) {
+        Applicants = applicants;
+    }
+
+    public ArrayList<User> getTeam() {
+        return Team;
+    }
+
+    public void setTeam(ArrayList<User> team) {
+        Team = team;
+    }
+
+    public User getOwner() {
+        return Owner;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Project){
+            if(((Project) obj).UID == UID){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return UID.hashCode();
     }
 }

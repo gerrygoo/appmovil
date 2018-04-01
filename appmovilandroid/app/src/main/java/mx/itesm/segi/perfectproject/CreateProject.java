@@ -15,6 +15,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import Model.Project;
+
 
 /**
  * A simple {@link Fragment} subclass.

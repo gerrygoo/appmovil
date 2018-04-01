@@ -22,6 +22,8 @@ import android.widget.FrameLayout;
 
 import java.util.Calendar;
 
+import Model.Project;
+
 public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener{
 
     private final long duration = 100;
@@ -138,6 +140,8 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         Calendar endDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 10);
         return new Project(
+                "12345",
+                null,
                 "Smart Cars",
                 "https://pmcvariety.files.wordpress.com/2015/08/google-placeholder-logo.jpg?w=1000&h=563&crop=1",
                 new String[]{ "Programmer", "Product Manager", "Experience Designer" },
@@ -155,6 +159,8 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         endDate.add(Calendar.MONTH, 8);
 
         return new Project(
+                "12321",
+                null,
                 "Cortana Search",
                 "https://mspoweruser.com/wp-content/uploads/2016/09/Webgroesse_HighRes_Microsoft12711.jpg",
                 new String[]{ "Programmer", "Program Manager", "Tester" },
