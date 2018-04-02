@@ -53,6 +53,7 @@
         app:layout_constraintTop_toBottomOf="@+id/_2">
 
         <android.support.design.widget.TextInputEditText
+            android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/prompt_password_hint" />
@@ -70,13 +71,14 @@
         app:layout_constraintTop_toBottomOf="@+id/_3">
 
         <android.support.design.widget.TextInputEditText
+            android:id="@+id/password_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/prompt_password_confirm_hint" />
     </android.support.design.widget.TextInputLayout>
 
     <Button
-        android:id="@+id/button5"
+        android:id="@+id/submitBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -86,4 +88,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@android:color/holo_red_dark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/_4" />
 </android.support.constraint.ConstraintLayout>
