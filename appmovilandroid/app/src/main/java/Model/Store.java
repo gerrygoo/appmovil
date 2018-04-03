@@ -3,18 +3,52 @@ package Model;
 import java.util.ArrayList;
 
 /**
- * Created by ianne on 1/04/2018.
+ * Created by ianne on 2/04/2018.
  */
 
-interface Store {
-    User getUser(String uid);
+public class Store implements IStore {
+    @Override
+    public User getUser(String uid) {
+        return null;
+    }
 
-    ArrayList<String> getAllProjectsUIDs();
-    Project getProject(String uid);
-    ArrayList<Project> getProjects(ArrayList<String> uids);
-    void createProject(Project project);
+    @Override
+    public ArrayList<String> getAllProjectsUIDs() {
+        return null;
+    }
 
-    boolean authenticate(String username, String password) throws Errors.AuthException;
-    void register(User user) throws  Errors.RegisterException;
+    @Override
+    public Project getProject(String uid) {
+        return null;
+    }
 
+    @Override
+    public ArrayList<Project> getProjects(ArrayList<String> uids) {
+        return null;
+    }
+
+    @Override
+    public boolean authenticate(String username, String password) throws Errors.AuthException {
+        return false;
+    }
+
+    @Override
+    public void updateProject(Project project) {
+
+    }
+
+    @Override
+    public void updateUser(User user) {
+
+    }
+
+    @Override
+    public void register(User user, String password) throws Errors.RegisterException {
+
+    }
+
+    @Override
+    public void createProject(Project project) {
+
+    }
 }

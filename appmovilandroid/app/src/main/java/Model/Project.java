@@ -22,6 +22,11 @@ import mx.itesm.segi.perfectproject.ImageListener;
 public class Project implements Parcelable{
 
     private String UID;
+
+    public String getUID() {
+        return UID;
+    }
+
     private User Owner;
     private String Title;
     private Bitmap Image;
@@ -140,6 +145,10 @@ public class Project implements Parcelable{
         }
     }
 
+    protected void setUID(String UID) {
+        this.UID = UID;
+    }
+
     public String getTitle() {
         return Title;
     }
@@ -176,16 +185,32 @@ public class Project implements Parcelable{
         return Applicants;
     }
 
-    public void setApplicants(ArrayList<User> applicants) {
+    protected void setApplicants(ArrayList<User> applicants) {
         Applicants = applicants;
+    }
+
+    public void addApplicant(User applicant){
+        Applicants.add(applicant);
+    }
+
+    public void removeApplicant(User applicant) {
+        Applicants.remove(applicant);
     }
 
     public ArrayList<User> getTeam() {
         return Team;
     }
 
-    public void setTeam(ArrayList<User> team) {
+    protected void setTeam(ArrayList<User> team) {
         Team = team;
+    }
+
+    public void addTeamMember(User user){
+        this.Team.add(user);
+    }
+
+    public void removeTeamMember(User user){
+        this.Team.remove(user);
     }
 
     public User getOwner() {

@@ -8,7 +8,8 @@ public class Errors {
     public enum AuthError {
         InvalidUsername,
         InvalidPassword,
-        ServiceUnavailable
+        ServiceUnavailable,
+        MissingItems
     }
 
     public enum RegisterError{
@@ -22,7 +23,7 @@ public class Errors {
         MissingItem
     }
 
-    public class AuthException extends Exception{
+    public static class AuthException extends Exception{
         String message;
         AuthError error;
 
@@ -41,7 +42,7 @@ public class Errors {
         }
     }
 
-    public class RegisterException extends Exception {
+    public static class RegisterException extends Exception {
         String message;
         RegisterError error;
 
@@ -60,7 +61,7 @@ public class Errors {
         }
     }
 
-    public class CreateProjectException extends Exception {
+    public static class CreateProjectException extends Exception {
         String message;
         CreateProjectError error;
 

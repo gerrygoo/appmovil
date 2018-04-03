@@ -2,9 +2,7 @@ package Model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 /**
  * Created by ianne on 1/04/2018.
@@ -16,7 +14,7 @@ public class User {
     private String Email;
     private String Name;
     private String Company;
-    private String Curriculum;
+    private ArrayList<String> Skills; //Probably own class
     private ArrayList<Project> Projects;
     private HashMap<String, Boolean> ReviewedProjects;
     private HashMap<Project, Boolean> Notifications;
@@ -35,7 +33,7 @@ public class User {
         Projects = new ArrayList<>();
         Notifications = new HashMap<>();
         ReviewedProjects = new HashMap<>();
-        Curriculum = "";
+        Skills = new ArrayList<>();
     }
 
     public void addProject(Project ...projects){
@@ -46,8 +44,8 @@ public class User {
         Collections.addAll(Projects, projects);
     }
 
-    public void setCurriculum(String curriculum){
-        this.Curriculum = curriculum;
+    public void setSkills(ArrayList<String> skills){
+        this.Skills = skills;
     }
 
     public String getUID() {
@@ -70,8 +68,8 @@ public class User {
         return Company;
     }
 
-    public String getCurriculum() {
-        return Curriculum;
+    public ArrayList<String> getSkills() {
+        return Skills;
     }
 
     public ArrayList<Project> getProjects() {
@@ -101,7 +99,22 @@ public class User {
         return ReviewedProjects.get(projectUID);
     }
 
+    protected void reviewProject(Project project, boolean accept){
+        ReviewedProjects.put(project.getUID(), true);
+
+    }
+
     protected void setReviewedProjects(HashMap<String, Boolean> reviewedProjects) {
         ReviewedProjects = reviewedProjects;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof User){
+            if(((User) obj).getUID() == UID){
+                return true;
+            }
+        }
+        return false;
     }
 }
