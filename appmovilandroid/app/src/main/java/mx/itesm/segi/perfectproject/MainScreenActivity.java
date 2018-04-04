@@ -121,11 +121,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
 
         model = Model.getInstance();
-        try {
-            model.authenticate("iansa", "iansa");
-        } catch (Exception e){
-            Log.i("Login in","not available");
-        }
+
         views = new View[]{
                 findViewById(R.id.fragmentPlacer),
                 findViewById(R.id.fragmentPlacerDraggable),
@@ -176,12 +172,13 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void renderProfile(){
-        Bundle argsProfile = new Bundle();
-        argsProfile.putString("name", "Willy Wonka");
-        argsProfile.putString("company", "Chocolate Factory");
-        argsProfile.putString("curriculum", "Developer, Designer, Project Manager");
-        argsProfile.putBoolean("mode", accountMode);
+
         Fragment profile = new ProfileFrag();
+        Bundle argsProfile = new Bundle();
+
+        argsProfile.putParcelable(ProfileFrag.ARG_USER, Model.getInstance().getCurrentUser());
+        argsProfile.putBoolean(ProfileFrag.ARG_MODE, accountMode);
+
         profile.setArguments(argsProfile);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).commit();
         activeFragments = new Fragment[]{profile};

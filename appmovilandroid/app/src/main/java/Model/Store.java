@@ -27,8 +27,8 @@ public class Store implements IStore {
         users = new ArrayList<>();
         projects = new ArrayList<Project>();
 
-        users.add(new User("1", "iansa", "ian@ian.com", "Ian", "Microsoft", 5, false));
-        users.add(new User("2", "gerrygoo", "ger@ger.com", "Gerry", "Sadeira", 4, false));
+        users.add(new User("iansa", "Ian"));
+        users.add(new User("ger@ger.com", "Gerry"));
 
         passwords.put(users.get(0), "iansa");
         passwords.put(users.get(1), "gerrygoo");
@@ -83,7 +83,7 @@ public class Store implements IStore {
             throw new Errors.AuthException("username or password missing", Errors.AuthError.MissingItems);
         }
         for(User user: users){
-            if(Objects.equals(user.getEmail(), username) || Objects.equals(user.getUserName(), username)){
+            if(Objects.equals(user.getEmail(), username)){
                 if(Objects.equals(password, passwords.get(user))){
                     return user;
                 }
@@ -127,11 +127,8 @@ public class Store implements IStore {
 
     @Override
     public void register(User user, String password) throws Errors.RegisterException {
-        if(user.getUID().isEmpty() || user.getUserName().isEmpty() || user.getName().isEmpty() || user.getEmail().isEmpty() || password.isEmpty()){
+        if(user.getName().isEmpty() || user.getEmail().isEmpty() || password.isEmpty()){
             throw new Errors.RegisterException("Item is missing", Errors.RegisterError.MissingItem);
-        }
-        if(!verifyUsername(user.getUserName())){
-            throw new Errors.RegisterException("Username already in use", Errors.RegisterError.UsernameInUse);
         }
         if(!verifyEmail(user.getEmail())){
             throw new Errors.RegisterException("Account already exists", Errors.RegisterError.AccountAlreadyExists);
@@ -139,17 +136,9 @@ public class Store implements IStore {
         if(!verifyPassword(password)){
             throw new Errors.RegisterException("Invalid password", Errors.RegisterError.InvalidPassword);
         }
+        user.setUID(random.nextInt(1000000) + "");
         users.add(user);
         passwords.put(user, password);
-    }
-
-    private boolean verifyUsername(String username) {
-        for(User user: users){
-            if(user.getUserName().equalsIgnoreCase(username)){
-                return false;
-            }
-        }
-        return true;
     }
 
     private boolean verifyEmail(String email) {
