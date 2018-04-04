@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import Model.Model;
+
 public class Login extends AppCompatActivity {
 
     private TextInputEditText emailTxt;
@@ -39,7 +41,12 @@ public class Login extends AppCompatActivity {
 
 
     private boolean authenticate(String email, String password){
-        return !email.isEmpty() && !password.isEmpty();
+
+        try {
+            return Model.getInstance().authenticate(email, password);
+        } catch (Exception e){
+            return false;
+        }
     }
 
     private void handleSubmit() {

@@ -6,13 +6,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import Model.Model;
+import Model.User;
+import Model.Errors;
 
 public class SignUp extends AppCompatActivity {
 
     private TextInputEditText
-        emailTxt, emailConfirmTxt,
-        passwordTxt, passwordConfirmTxt;
-    private TextView errorText;
+            emailTxt, emailConfirmTxt,
+            passwordTxt, passwordConfirmTxt,
+            nameTxt;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,9 +27,9 @@ public class SignUp extends AppCompatActivity {
 
         emailTxt = findViewById(R.id.email);
         emailConfirmTxt = findViewById(R.id.email_2);
-        passwordTxt =  findViewById(R.id.password);
-        passwordConfirmTxt =  findViewById(R.id.password_2);
-        errorText = findViewById(R.id.errorText);
+        passwordTxt = findViewById(R.id.password);
+        passwordConfirmTxt = findViewById(R.id.password_2);
+        nameTxt = findViewById(R.id.name);
 
         findViewById(R.id.submitBtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -33,30 +39,67 @@ public class SignUp extends AppCompatActivity {
         });
     }
 
-    private boolean authenticate(String email, String emailConfirm, String password, String passwordConfirm){
-        return !email.isEmpty()
-                && !password.isEmpty()
-                && !emailConfirm.isEmpty()
-                && !passwordConfirm.isEmpty()
-                && email.equals(emailConfirm)
-                && password.equals(passwordConfirm);
-    }
-
     private void handleSubmit() {
         String
                 email = emailTxt.getText().toString(),
-                emailComfirm = emailConfirmTxt.getText().toString(),
+                emailConfirm = emailConfirmTxt.getText().toString(),
                 password = passwordTxt.getText().toString(),
-                passwordConfirm = passwordConfirmTxt.getText().toString();
+                passwordConfirm = passwordConfirmTxt.getText().toString(),
+                name = nameTxt.getText().toString();
 
-        if ( authenticate(email, emailComfirm, password, passwordConfirm) ) {
-
-            startActivity(new Intent(this, MainScreenActivity.class));
-        } else {
-
-            errorText.setText("Incoeherent data entered.");
+        if (email.isEmpty())
+        {
+            emailTxt.setError("Email cannot be empty!");
+            return;
+        }
+        else if (emailConfirm.isEmpty())
+        {
+            emailConfirmTxt.setError("Email confirmation cannot be empty!");
+            return;
+        }
+        else if (password.isEmpty())
+        {
+            passwordTxt.setError("Password cannot be empty!");
+            return;
+        }
+        else if (passwordConfirm.isEmpty())
+        {
+            passwordConfirmTxt.setError("Password confirmation cannot be empty!");
+            return;
+        }
+        else if (name.isEmpty())
+        {
+            nameTxt.setError("Name cannot be empty!");
+            return;
+        }
+        else if (!email.equals(emailConfirm))
+        {
+            emailTxt.setError("Email does not match!");
+            emailConfirmTxt.setError("Email does not match!");
+            return;
+        }
+        else if (!password.equals(passwordConfirm))
+        {
+            passwordTxt.setError("Password does not match!");
+            passwordConfirmTxt.setError("Password does not match!");
+            return;
         }
 
+        try {
+            Model.getInstance().register(new User(email, name), password);
+        } catch (Errors.RegisterException exception) {
+            if(exception.getError() == Errors.RegisterError.AccountAlreadyExists || exception.getError() == Errors.RegisterError.UsernameInUse){
+                emailTxt.setError("That account is already in use");
+                return;
+            }
+            if(exception.getError() == Errors.RegisterError.InvalidPassword){
+                passwordTxt.setError(exception.getMessage());
+                return;
+            }
+            Toast.makeText(this,exception.getMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
+        finish();
     }
 
 

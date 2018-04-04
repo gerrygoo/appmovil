@@ -1,9 +1,12 @@
 package mx.itesm.segi.perfectproject;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
+import android.service.quicksettings.Tile;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -11,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -114,6 +118,8 @@ public class CreateProject extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     create(view);
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -161,6 +167,14 @@ public class CreateProject extends Fragment {
             Log.i("Exito", project.toString());
             try {
                 Model.getInstance().createProject(project);
+                Title.setText("");
+                ImageUrl = "";
+                StartDate.setText("");
+                EndDate.setText("");
+                Positions.setText("");
+                Location.setText("");
+                Description.setText("");
+                Create.setText("");
             } catch (Errors.CreateProjectException exception) {
                 Snackbar.make(v, exception.getMessage(), Snackbar.LENGTH_LONG).show();
             }

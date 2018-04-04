@@ -1,5 +1,8 @@
 package Model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,9 +11,9 @@ import java.util.HashMap;
  * Created by ianne on 1/04/2018.
  */
 
-public class User {
+public class User implements Parcelable{
+
     private String UID;
-    private String UserName;
     private String Email;
     private String Name;
     private String Company;
@@ -22,19 +25,42 @@ public class User {
     private int Rating;
     private boolean Premium;
 
-    public User(String UID, String userName, String email, String name, String company, int rating, boolean premium) {
-        this.UID = UID;
-        UserName = userName;
+    public User(String email, String name) {
         Email = email;
         Name = name;
-        Company = company;
-        Rating = rating;
-        Premium = premium;
+
+        UID = "";
+        Company = "";
+        Rating = -1;
+        Premium = false;
         Projects = new ArrayList<>();
         Notifications = new HashMap<>();
         ReviewedProjects = new HashMap<>();
         Skills = new ArrayList<>();
     }
+
+    protected User(Parcel in) {
+        UID = in.readString();
+        Email = in.readString();
+        Name = in.readString();
+        Company = in.readString();
+        Skills = in.createStringArrayList();
+        Projects = in.createTypedArrayList(Project.CREATOR);
+        Rating = in.readInt();
+        Premium = in.readByte() != 0;
+    }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 
     public void addProject(Project ...projects){
         Collections.addAll(Projects, projects);
@@ -52,8 +78,8 @@ public class User {
         return UID;
     }
 
-    public String getUserName() {
-        return UserName;
+    void setUID(String UID) {
+        this.UID = UID;
     }
 
     public String getEmail() {
@@ -116,5 +142,22 @@ public class User {
             }
         }
         return false;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(UID);
+        parcel.writeString(Email);
+        parcel.writeString(Name);
+        parcel.writeString(Company);
+        parcel.writeStringList(Skills);
+        parcel.writeTypedList(Projects);
+        parcel.writeInt(Rating);
+        parcel.writeByte((byte) (Premium ? 1 : 0));
     }
 }
