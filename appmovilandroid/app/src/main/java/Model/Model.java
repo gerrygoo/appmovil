@@ -1,0 +1,103 @@
+package Model;
+
+import java.util.ArrayList;
+
+/**
+ * Created by ianne on 2/04/2018.
+ */
+
+public class Model implements IModel {
+
+    private IStore Store;
+    private static Model instance;
+    private User currentUser;
+
+    private Model(IStore store){
+        Store = store;
+    }
+
+    public static IModel getInstance() {
+        if(instance == null){
+            instance = new Model(new Store());
+        }
+        return instance;
+    }
+
+    @Override
+    public ArrayList<Project> getAvailableProjects() {
+        ArrayList<String> uids = Store.getAllProjectsUIDs();
+        ArrayList<Project> projects = new ArrayList<>(uids.size());
+        ArrayList<String> pendingProjectsUIDs = new ArrayList<>(uids.size());
+
+        for (String uid: uids) {
+            if(!currentUser.hasReviewedProject(uid)){
+                pendingProjectsUIDs.add(uid);
+            }
+        }
+
+        return  Store.getProjects(pendingProjectsUIDs);
+    }
+
+    @Override
+    public ArrayList<Project> getMyProjects() {
+        return currentUser.getProjects();
+    }
+
+    @Override
+    public ArrayList<User> getApplicants(String projectUID) {
+        return Store.getProject(projectUID).getApplicants();
+    }
+
+    @Override
+    public ArrayList<User> getTeam(String projectUID) {
+        return Store.getProject(projectUID).getTeam();
+    }
+
+    @Override
+    public boolean authenticate(String username, String password) throws Errors.AuthException {
+        if(username.isEmpty() || password.isEmpty()){
+            throw new Errors.AuthException("Username or password is Missing", Errors.AuthError.MissingItems);
+        }
+        return Store.authenticate(username, password);
+    }
+
+    @Override
+    public void logout() {
+        this.currentUser = null;
+    }
+
+    @Override
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    // TODO
+    @Override
+    public void register(User user, String password) throws Errors.RegisterException {
+        if(user == null || password.isEmpty()){
+            throw new Errors.RegisterException("Missing user or password", Errors.RegisterError.MissingItem);
+        }
+        Store.register(user,password);
+    }
+
+    @Override
+    public void reviewApplicant(Project project, User applicant, boolean accept) {
+        if(accept) {
+            project.addTeamMember(applicant);
+        }
+        project.removeApplicant(applicant);
+        Store.updateProject(project);
+    }
+
+    @Override
+    public void createProject(Project project) throws Errors.CreateProjectException {
+        Store.createProject(project);
+    }
+
+    @Override
+    public void reviewProject(Project project, boolean accept) {
+        currentUser.reviewProject(project, accept);
+        Store.updateUser(currentUser);
+
+    }
+}

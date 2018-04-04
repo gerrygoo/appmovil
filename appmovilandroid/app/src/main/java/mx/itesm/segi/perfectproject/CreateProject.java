@@ -15,6 +15,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import Model.Project;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -124,6 +126,8 @@ public class CreateProject extends Fragment {
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
             Project project = new Project(
+                    "1234",
+                    null,
                     Title.getText().toString(),
                     ImageUrl,
                     PositionsArr,

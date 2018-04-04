@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import Model.Project;
+
 
 /**
  * A simple {@link Fragment} subclass.
