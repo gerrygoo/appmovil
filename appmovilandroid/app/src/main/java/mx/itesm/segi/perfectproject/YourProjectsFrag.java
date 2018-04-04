@@ -4,14 +4,20 @@ package mx.itesm.segi.perfectproject;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+
+import java.util.ArrayList;
+
+import Model.Model;
+import Model.User;
+import Model.Project;
 
 
 /**
@@ -19,13 +25,15 @@ import android.widget.ListView;
  */
 public class YourProjectsFrag extends Fragment {
 
+    public static final String ARG_USER = "user";
+    public static final String ARG_OWNED = "owned";
+
     private RecyclerView rvYourProjects;
     private Listener listener;
-
-    static interface Listener{
-        void itemClicked(long id);
-        void clearNew(int position);
-    }
+    private User user;
+    private ArrayList<Project> projects;
+    private boolean owned;
+    private boolean shouldRemoveBackStack;
 
     public YourProjectsFrag() {
         // Required empty public constructor
@@ -39,6 +47,7 @@ public class YourProjectsFrag extends Fragment {
         View v = inflater.inflate(R.layout.fragment_yourprojects, container, false);
         rvYourProjects = v.findViewById(R.id.list);
         rvYourProjects.setLayoutManager(new GridLayoutManager(getContext(),1));
+        shouldRemoveBackStack = false;
         return v;
     }
 
@@ -56,15 +65,51 @@ public class YourProjectsFrag extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.listener = (Listener) context;
+        this.listener = new Listener() {
+            @Override
+            public void itemClicked(long id) {
+                shouldRemoveBackStack = true;
+                renderProject((int)id);
+            }
+
+            @Override
+            public void clearNew(int position) {
+                Model.getInstance().viewNotificaction(projects.get(position));
+            }
+        };
     }
 
     private void loadProjects() {
-        String[] titles = getArguments().getStringArray("titles");
-        String[] startDates = getArguments().getStringArray("startDates");
-        String[] endDates = getArguments().getStringArray("endDates");
-        boolean[] news = getArguments().getBooleanArray("news");
-        AdapterRV adapterRV = new AdapterRV(titles, startDates, endDates, news, listener);
+        this.user = getArguments().getParcelable(ARG_USER);
+        this.owned = getArguments().getBoolean(ARG_OWNED);
+        AdapterRV adapterRV;
+
+        if(owned){
+            this.projects = user.getProjectsOwned();
+            adapterRV = new AdapterRV(user.getProjectsOwned(), true, listener);
+        } else {
+            adapterRV = new AdapterRV(user.getProjectsMember(), false, listener);
+            adapterRV.setNotifications(user.getNotifications());
+        }
         rvYourProjects.setAdapter(adapterRV);
+    }
+
+    private void renderProject(int position) {
+        Fragment fragment = MainScreenActivity.projectToCard(projects.get(position));
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, fragment).addToBackStack(MainScreenActivity.BACK_STACK);
+        transaction.commit();
+    }
+
+    static interface Listener{
+        void itemClicked(long id);
+        void clearNew(int position);
+    }
+
+    @Override
+    public void onDetach() {
+        if(shouldRemoveBackStack) {
+            getActivity().getSupportFragmentManager().popBackStackImmediate(MainScreenActivity.BACK_STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+        super.onDetach();
     }
 }

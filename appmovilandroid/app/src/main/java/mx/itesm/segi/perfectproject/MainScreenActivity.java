@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Choreographer;
@@ -26,21 +27,14 @@ import Model.Model;
 import Model.IModel;
 import Model.Project;
 
-public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener, YourProjectsFrag.Listener{
+public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener {
 
+    public static final String BACK_STACK = "Main Activity Back";
     private final long duration = 100;
     private final boolean EMPLOYEE = false, EMPLOYER = true;
     private final int INITIAL_MENU_ITEM = 1;
     private float startingX, startingY, initialTouchX, initialTouchY;
     private boolean accountMode = EMPLOYEE;
-
-    private String[] titles = {"Microsoft", "Cortana Search", "Oracle project"};
-    private String[] startDates = {"14/01", "15/02", "16/03"};
-    private String[] endDates = {"14/04", "15/05", "16/06"};
-    private String[] positions = {"Project Manager", "Developer", "Designer"};
-    private String[] locations = {"Canada", "USA", "Mexico"};
-    private String[] descriptions = {"Description 1", "Description 2", "Description 3"};
-    private boolean[] news = {true, false, true};
 
     private Fragment[] activeFragments;
     private View[] views;
@@ -119,14 +113,11 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
             }
         });
 
-
         model = Model.getInstance();
-
         views = new View[]{
                 findViewById(R.id.fragmentPlacer),
                 findViewById(R.id.fragmentPlacerDraggable),
         };
-        projects = model.getAvailableProjects();
 
         renderBrowse();
 
@@ -135,7 +126,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         navigation.getMenu().getItem(INITIAL_MENU_ITEM).setChecked(true);
     }
 
-    private Fragment projectToCard(Project project){
+    public static Fragment projectToCard(Project project){
         Fragment card = new ProjectCard();
         Bundle args = new Bundle();
         args.putParcelable(ProjectCard.ARG_PROJECT, project);
@@ -156,13 +147,13 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
                     renderBrowse();
                 }else {
                     usingFragments();
-                    renderYourProjects();
+                    renderYourProjects(true);
                 }
                 return true;
             case R.id.navigation_myprojects:
                 usingFragments();
                 if(accountMode == EMPLOYEE) {
-                    renderYourProjects();
+                    renderYourProjects(false);
                 } else {
                     renderCreateProject();
                 }
@@ -185,6 +176,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void renderBrowse(){
+        currentProject = 0;
         this.projects = model.getAvailableProjects();
         renderCards(currentProject, currentProject+1);
     }
@@ -212,13 +204,13 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         activeFragments = new Fragment[]{newProject};
     }
 
-    private void renderYourProjects(){
-        Bundle argYourProjects = new Bundle();
-        argYourProjects.putStringArray("titles", titles);
-        argYourProjects.putStringArray("startDates", startDates);
-        argYourProjects.putStringArray("endDates", endDates);
-        argYourProjects.putBooleanArray("news", news);
+    private void renderYourProjects(boolean owned){
         Fragment yourProjects = new YourProjectsFrag();
+        Bundle argYourProjects = new Bundle();
+
+        argYourProjects.putParcelable(YourProjectsFrag.ARG_USER, Model.getInstance().getCurrentUser());
+        argYourProjects.putBoolean(YourProjectsFrag.ARG_OWNED, owned);
+
         yourProjects.setArguments(argYourProjects);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, yourProjects).commit();
     }
@@ -238,6 +230,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     public void handleYes(){
+        Model.getInstance().reviewProject(projects.get(currentProject), true);
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         animateDragTo(+screenWidth, startingY).addListener(new Animator.AnimatorListener() {
             @Override
@@ -264,6 +257,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     public void handleNo(){
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+        Model.getInstance().reviewProject(projects.get(currentProject), false);
         animateDragTo(-screenWidth, startingY).addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
@@ -313,6 +307,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void clearFragments(){
+        getSupportFragmentManager().popBackStackImmediate(MainScreenActivity.BACK_STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         for(Fragment f: activeFragments) {
             getSupportFragmentManager().beginTransaction().remove(f).commit();
         }
@@ -338,29 +333,5 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
             menu.getItem(2).setIcon(R.drawable.ic_add_black_24dp);
             menu.getItem(2).setTitle(R.string.navigation_create_project);
         }
-    }
-
-    @Override
-    public void itemClicked(long id) {
-        renderProject(id);
-    }
-
-    @Override
-    public void clearNew(int position)
-    {
-        news[position] = false;
-    }
-
-    private void renderProject(long id) {
-        Bundle argProjectInfo = new Bundle();
-        argProjectInfo.putString("title", titles[(int)id]);
-        argProjectInfo.putString("startDate", startDates[(int)id]);
-        argProjectInfo.putString("endDate", endDates[(int)id]);
-        argProjectInfo.putString("positions", positions[(int)id]);
-        argProjectInfo.putString("location", locations[(int)id]);
-        argProjectInfo.putString("description", descriptions[(int)id]);
-        Fragment projectInfo = new ProjectInfoFrag();
-        projectInfo.setArguments(argProjectInfo);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, projectInfo).commit();
     }
 }

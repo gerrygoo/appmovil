@@ -39,7 +39,13 @@ public class Model implements IModel {
 
     @Override
     public ArrayList<Project> getMyProjects() {
-        return currentUser.getProjects();
+        return currentUser.getProjectsMember();
+    }
+
+    @Override
+    public void viewNotificaction(Project project) {
+        currentUser.viewNotification(project);
+        Store.updateUser(currentUser);
     }
 
     @Override
@@ -88,6 +94,8 @@ public class Model implements IModel {
     public void reviewApplicant(Project project, User applicant, boolean accept) {
         if(accept) {
             project.addTeamMember(applicant);
+            applicant.addProject(project);
+            Store.updateUser(applicant);
         }
         project.removeApplicant(applicant);
         Store.updateProject(project);
@@ -96,12 +104,15 @@ public class Model implements IModel {
     @Override
     public void createProject(Project project) throws Errors.CreateProjectException {
         Store.createProject(project);
+        currentUser.addProjectOwned(project);
+        Store.updateUser(currentUser);
     }
 
     @Override
     public void reviewProject(Project project, boolean accept) {
         currentUser.reviewProject(project, accept);
         Store.updateUser(currentUser);
-
     }
+
+
 }

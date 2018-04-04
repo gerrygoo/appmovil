@@ -12,6 +12,7 @@ public interface IModel {
 
     ArrayList<Project> getAvailableProjects();
     ArrayList<Project> getMyProjects();
+    void viewNotificaction(Project project);
 
     ArrayList<User> getApplicants(String projectUID);
     ArrayList<User> getTeam(String projectUID);
