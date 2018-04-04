@@ -22,11 +22,6 @@ import mx.itesm.segi.perfectproject.ImageListener;
 public class Project implements Parcelable{
 
     private String UID;
-
-    public String getUID() {
-        return UID;
-    }
-
     private User Owner;
     private String Title;
     private Bitmap Image;
@@ -144,8 +139,11 @@ public class Project implements Parcelable{
             imageListener.onImageAvailable(this.Image);
         }
     }
+    public String getUID() {
+        return UID;
+    }
 
-    protected void setUID(String UID) {
+    void setUID(String UID) {
         this.UID = UID;
     }
 

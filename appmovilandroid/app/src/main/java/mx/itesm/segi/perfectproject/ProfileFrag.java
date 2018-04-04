@@ -10,7 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RatingBar;
 import android.widget.Switch;
+
+import Model.User;
 
 
 /**
@@ -18,11 +21,17 @@ import android.widget.Switch;
  */
 public class ProfileFrag extends Fragment {
 
+    public final static String ARG_USER = "user";
+    public final static String ARG_MODE = "mode";
+
     private EditText tvName;
     private EditText tvCompany;
     private EditText tvCurriculum;
+    private RatingBar rbRating;
     private Switch Mode;
     private OnSwitchToggleListener listener;
+
+    private User user;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -44,9 +53,12 @@ public class ProfileFrag extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
+
         tvName = v.findViewById(R.id.tvName);
         tvCompany = v.findViewById(R.id.tvCompany);
         tvCurriculum = v.findViewById(R.id.etCurriculum);
+        rbRating = v.findViewById(R.id.rbRating);
+
         tvCurriculum.setKeyListener(null);
         Mode = v.findViewById(R.id.sEmployer);
         Mode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -60,10 +72,12 @@ public class ProfileFrag extends Fragment {
     }
 
     private void loadProfileInfo() {
-        tvName.setText(getArguments().getString("name"));
-        tvCompany.setText(getArguments().getString("company"));
-        tvCurriculum.setText(getArguments().getString("curriculum"));
-        Mode.setChecked(getArguments().getBoolean("mode"));
+        user = getArguments().getParcelable(ARG_USER);
+        tvCompany.setText(user.getCompany());
+        tvCurriculum.setText(user.getSkills().toString());
+        tvName.setText(user.getName());
+        rbRating.setRating(user.getRating());
+        Mode.setChecked(getArguments().getBoolean(ARG_MODE));
     }
 
     public interface OnSwitchToggleListener {
