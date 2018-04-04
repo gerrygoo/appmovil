@@ -14,13 +14,14 @@ public class Errors {
 
     public enum RegisterError{
         UsernameInUse,
-        InvalidUsername,
+        AccountAlreadyExists,
         InvalidPassword,
         MissingItem
     }
 
     public enum CreateProjectError {
-        MissingItem
+        MissingItems,
+        InvalidProject,
     }
 
     public static class AuthException extends Exception{

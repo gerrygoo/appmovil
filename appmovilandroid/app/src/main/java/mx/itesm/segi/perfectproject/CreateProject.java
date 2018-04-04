@@ -1,6 +1,10 @@
 package mx.itesm.segi.perfectproject;
 
+import android.app.DatePickerDialog;
+import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -8,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -15,7 +20,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import Model.Model;
 import Model.Project;
+import Model.Errors;
 
 
 /**
@@ -60,6 +67,7 @@ public class CreateProject extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -74,6 +82,26 @@ public class CreateProject extends Fragment {
         Location = result.findViewById(R.id.etLocation);
         Description = result.findViewById(R.id.etDescription);
         Create = result.findViewById(R.id.btnCreate);
+
+        myCalendar = Calendar.getInstance();
+
+        StartDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(getContext(), startDateListener, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+        EndDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(getContext(), endDateListener, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
 
         Logo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,38 +124,32 @@ public class CreateProject extends Fragment {
         return result;
     }
 
-    public void setImage(View v){
+    public void setImage(View v) {
         ImageUrl = "https://mspoweruser.com/wp-content/uploads/2016/09/Webgroesse_HighRes_Microsoft12711.jpg";
     }
+
     public void create(View v) throws ParseException {
-        if(Title.length()==0){
+        if (Title.length() == 0) {
             Snackbar.make(v, "Insert title", Snackbar.LENGTH_LONG).show();
-        }
-        else if(ImageUrl==null){
+        } else if (ImageUrl == null) {
             Snackbar.make(v, "Insert logo", Snackbar.LENGTH_LONG).show();
-        }
-        else if(StartDate.length()==0){
+        } else if (StartDate.length() == 0) {
             Snackbar.make(v, "Insert start date", Snackbar.LENGTH_LONG).show();
-        }
-        else if(EndDate.length()==0){
+        } else if (EndDate.length() == 0) {
             Snackbar.make(v, "Insert end date", Snackbar.LENGTH_LONG).show();
-        }
-        else if(Positions.length()==0){
+        } else if (Positions.length() == 0) {
             Snackbar.make(v, "Insert positions", Snackbar.LENGTH_LONG).show();
-        }
-        else if(Location.length()==0){
+        } else if (Location.length() == 0) {
             Snackbar.make(v, "Insert location", Snackbar.LENGTH_LONG).show();
-        }
-        else if(Description.length()==0){
+        } else if (Description.length() == 0) {
             Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
-        }
-        else{
+        } else {
             String[] PositionsArr = Positions.getText().toString().split(" ");
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
             Project project = new Project(
                     "1234",
-                    null,
+                    Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),
                     ImageUrl,
                     PositionsArr,
@@ -136,8 +158,32 @@ public class CreateProject extends Fragment {
                     Start,
                     End
             );
-            Log.i("Exito",project.toString());
-            //TODO: Link to DB and add project
+            Log.i("Exito", project.toString());
+            try {
+                Model.getInstance().createProject(project);
+            } catch (Errors.CreateProjectException exception) {
+                Snackbar.make(v, exception.getMessage(), Snackbar.LENGTH_LONG).show();
+            }
         }
     }
+
+    Calendar myCalendar;
+    final DatePickerDialog.OnDateSetListener startDateListener = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            StartDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+        }
+
+    };
+    final DatePickerDialog.OnDateSetListener endDateListener = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            EndDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+        }
+
+    };
 }

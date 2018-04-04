@@ -16,7 +16,7 @@ public class Model implements IModel {
         Store = store;
     }
 
-    public static IModel getInstance() {
+    public static Model getInstance() {
         if(instance == null){
             instance = new Model(new Store());
         }
@@ -26,7 +26,6 @@ public class Model implements IModel {
     @Override
     public ArrayList<Project> getAvailableProjects() {
         ArrayList<String> uids = Store.getAllProjectsUIDs();
-        ArrayList<Project> projects = new ArrayList<>(uids.size());
         ArrayList<String> pendingProjectsUIDs = new ArrayList<>(uids.size());
 
         for (String uid: uids) {
@@ -58,7 +57,12 @@ public class Model implements IModel {
         if(username.isEmpty() || password.isEmpty()){
             throw new Errors.AuthException("Username or password is Missing", Errors.AuthError.MissingItems);
         }
-        return Store.authenticate(username, password);
+        try {
+            this.currentUser = Store.authenticate(username, password);
+            return true;
+        } catch (Errors.AuthException exception){
+            throw exception;
+        }
     }
 
     @Override
