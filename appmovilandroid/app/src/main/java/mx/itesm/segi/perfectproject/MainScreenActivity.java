@@ -21,19 +21,27 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import Model.Model;
 import Model.IModel;
 import Model.Project;
 
-public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener{
+public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener, YourProjectsFrag.Listener{
 
     private final long duration = 100;
     private final boolean EMPLOYEE = false, EMPLOYER = true;
     private final int INITIAL_MENU_ITEM = 1;
     private float startingX, startingY, initialTouchX, initialTouchY;
     private boolean accountMode = EMPLOYEE;
+
+    private String[] titles = {"Microsoft", "Cortana Search", "Oracle project"};
+    private String[] startDates = {"14/01", "15/02", "16/03"};
+    private String[] endDates = {"14/04", "15/05", "16/06"};
+    private String[] positions = {"Project Manager", "Developer", "Designer"};
+    private String[] locations = {"Canada", "USA", "Mexico"};
+    private String[] descriptions = {"Description 1", "Description 2", "Description 3"};
+    private boolean[] news = {true, false, true};
+
     private Fragment[] activeFragments;
     private View[] views;
 
@@ -152,13 +160,13 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
                     renderBrowse();
                 }else {
                     usingFragments();
-                    renderNotifications();
+                    renderYourProjects();
                 }
                 return true;
-            case R.id.navigation_notifications:
+            case R.id.navigation_myprojects:
                 usingFragments();
                 if(accountMode == EMPLOYEE) {
-                    renderNotifications();
+                    renderYourProjects();
                 } else {
                     renderCreateProject();
                 }
@@ -207,15 +215,15 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         activeFragments = new Fragment[]{newProject};
     }
 
-    private void renderNotifications(){
-        Bundle argNotifications = new Bundle();
-        argNotifications.putStringArray("dates", new String[]{Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString()});
-        argNotifications.putStringArray("titles", new String[]{"Notification 1", "Notification 2", "Notification 3"});
-        argNotifications.putStringArray("descriptions", new String[]{"Description 1", "Description 2", "Description 3"});
-        argNotifications.putBooleanArray("news", new boolean[]{true, false, true});
-        Fragment notifications = new NotificationFrag();
-        notifications.setArguments(argNotifications);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, notifications).commit();
+    private void renderYourProjects(){
+        Bundle argYourProjects = new Bundle();
+        argYourProjects.putStringArray("titles", titles);
+        argYourProjects.putStringArray("startDates", startDates);
+        argYourProjects.putStringArray("endDates", endDates);
+        argYourProjects.putBooleanArray("news", news);
+        Fragment yourProjects = new YourProjectsFrag();
+        yourProjects.setArguments(argYourProjects);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, yourProjects).commit();
     }
 
     private AnimatorSet animateDragTo(float x, float y){
@@ -325,13 +333,37 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         if(accountMode == EMPLOYEE){
             menu.getItem(1).setIcon(R.drawable.ic_home_black_24dp);
             menu.getItem(1).setTitle(R.string.navigation_browse);
-            menu.getItem(2).setIcon(R.drawable.ic_notifications_black_24dp);
-            menu.getItem(2).setTitle(R.string.navigation_notifications);
+            menu.getItem(2).setIcon(R.drawable.ic_work_black_24dp);
+            menu.getItem(2).setTitle(R.string.navigation_my_projects);
         }else {
             menu.getItem(1).setIcon(R.drawable.ic_work_black_24dp);
             menu.getItem(1).setTitle(R.string.navigation_my_projects);
             menu.getItem(2).setIcon(R.drawable.ic_add_black_24dp);
             menu.getItem(2).setTitle(R.string.navigation_create_project);
         }
+    }
+
+    @Override
+    public void itemClicked(long id) {
+        renderProject(id);
+    }
+
+    @Override
+    public void clearNews()
+    {
+        for(int i = 0;i < news.length;i++) news[i] = false;
+    }
+
+    private void renderProject(long id) {
+        Bundle argProjectInfo = new Bundle();
+        argProjectInfo.putString("title", titles[(int)id]);
+        argProjectInfo.putString("startDate", startDates[(int)id]);
+        argProjectInfo.putString("endDate", endDates[(int)id]);
+        argProjectInfo.putString("positions", positions[(int)id]);
+        argProjectInfo.putString("location", locations[(int)id]);
+        argProjectInfo.putString("description", descriptions[(int)id]);
+        Fragment projectInfo = new ProjectInfoFrag();
+        projectInfo.setArguments(argProjectInfo);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, projectInfo).commit();
     }
 }

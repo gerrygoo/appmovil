@@ -1,7 +1,9 @@
 package mx.itesm.segi.perfectproject;
 
+import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,48 +11,46 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-
 
 public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
 
     private String[] titles;
-    private String[] descriptions;
-    private String[] dates;
+    private String[] startDates;
+    private String[] endDates;
     private boolean[] news;
+    YourProjectsFrag.Listener listener;
 
-    public AdapterRV(String[] titles, String[] descriptions, String[] dates, boolean[] news)
+    public AdapterRV(String[] titles, String[] startDates, String[] endDates, boolean[] news, YourProjectsFrag.Listener listener)
     {
         this.titles = titles;
-        this.descriptions = descriptions;
-        this.dates = dates;
+        this.startDates = startDates;
+        this.endDates = endDates;
         this.news = news;
+        this.listener = listener;
     }
     @Override
     public ViewCard onCreateViewHolder(ViewGroup parent, int viewType) {
         CardView card = (CardView) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.notification_card, parent, false);
+                .inflate(R.layout.project_card, parent, false);
         return new ViewCard(card);
     }
 
     @Override
     public void onBindViewHolder(final ViewCard holder, final int position) {
         CardView card = holder.card;
-        TextView tvDate = card.findViewById(R.id.notificationCard_Date);
-        TextView tvTitle = card.findViewById(R.id.notificationCard_Title);
-        TextView tvDescription = card.findViewById(R.id.notificationCard_Description);
-        Button ok = card.findViewById(R.id.notificationCard_Ok);
-        ok.setOnClickListener(new View.OnClickListener() {
+        card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Do something to delete notification
+                listener.itemClicked(position);
+                listener.clearNews();
             }
         });
-        tvDate.setText(dates[position]);
+        TextView tvTitle = card.findViewById(R.id.projectCard_Title);
+        TextView tvStartDate = card.findViewById(R.id.projectCard_startDate);
+        TextView tvEndDate = card.findViewById(R.id.projectCard_endDate);
         tvTitle.setText(titles[position]);
-        tvDescription.setText(descriptions[position]);
+        tvStartDate.setText(startDates[position]);
+        tvEndDate.setText(endDates[position]);
         if(!news[position])
         {
             ImageView isNew = card.findViewById(R.id.ivNew);
