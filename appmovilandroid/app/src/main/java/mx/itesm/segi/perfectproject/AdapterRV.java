@@ -42,7 +42,7 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
             @Override
             public void onClick(View view) {
                 listener.itemClicked(position);
-                listener.clearNews();
+                listener.clearNew(position);
             }
         });
         TextView tvTitle = card.findViewById(R.id.projectCard_Title);

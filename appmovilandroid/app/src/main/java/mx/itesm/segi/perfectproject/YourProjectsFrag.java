@@ -24,7 +24,7 @@ public class YourProjectsFrag extends Fragment {
 
     static interface Listener{
         void itemClicked(long id);
-        void clearNews();
+        void clearNew(int position);
     }
 
     public YourProjectsFrag() {

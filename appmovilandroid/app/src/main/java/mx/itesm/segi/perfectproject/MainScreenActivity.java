@@ -349,9 +349,9 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     @Override
-    public void clearNews()
+    public void clearNew(int position)
     {
-        for(int i = 0;i < news.length;i++) news[i] = false;
+        news[position] = false;
     }
 
     private void renderProject(long id) {
