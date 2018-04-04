@@ -1,7 +1,9 @@
 package mx.itesm.segi.perfectproject;
 
+import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,63 +11,77 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import Model.Project;
 
 
 public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
 
-    private String[] titles;
-    private String[] descriptions;
-    private String[] dates;
-    private boolean[] news;
+    private ArrayList<Project> projects;
+    private HashMap<Project, Boolean> notifications;
+    private boolean owned;
 
-    public AdapterRV(String[] titles, String[] descriptions, String[] dates, boolean[] news)
-    {
-        this.titles = titles;
-        this.descriptions = descriptions;
-        this.dates = dates;
-        this.news = news;
+    YourProjectsFrag.Listener listener;
+
+    public AdapterRV(ArrayList<Project> projects, Boolean owned, YourProjectsFrag.Listener listener) {
+        this.projects = projects;
+        this.listener = listener;
+        this.owned = owned;
     }
+
     @Override
     public ViewCard onCreateViewHolder(ViewGroup parent, int viewType) {
         CardView card = (CardView) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.notification_card, parent, false);
+                .inflate(R.layout.project_card, parent, false);
         return new ViewCard(card);
     }
 
     @Override
     public void onBindViewHolder(final ViewCard holder, final int position) {
         CardView card = holder.card;
-        TextView tvDate = card.findViewById(R.id.notificationCard_Date);
-        TextView tvTitle = card.findViewById(R.id.notificationCard_Title);
-        TextView tvDescription = card.findViewById(R.id.notificationCard_Description);
-        Button ok = card.findViewById(R.id.notificationCard_Ok);
-        ok.setOnClickListener(new View.OnClickListener() {
+        Project currentProject = projects.get(position);
+
+        card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Do something to delete notification
+                listener.itemClicked(position);
+                listener.clearNew(position);
             }
         });
-        tvDate.setText(dates[position]);
-        tvTitle.setText(titles[position]);
-        tvDescription.setText(descriptions[position]);
-        if(!news[position])
-        {
+        TextView tvTitle = card.findViewById(R.id.projectCard_Title);
+        TextView tvStartDate = card.findViewById(R.id.projectCard_startDate);
+        TextView tvEndDate = card.findViewById(R.id.projectCard_endDate);
+
+        DateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+        
+        tvTitle.setText(currentProject.getTitle());
+        tvStartDate.setText(dateFormatter.format(currentProject.getStartDate()));
+        
+        tvEndDate.setText(dateFormatter.format(currentProject.getEndDate()));
+
+        if (owned || notifications == null || (notifications.containsKey(currentProject) && !notifications.get(currentProject))) {
             ImageView isNew = card.findViewById(R.id.ivNew);
             isNew.setVisibility(View.INVISIBLE);
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return titles.length;
+    public void setNotifications(HashMap<Project, Boolean> notifications) {
+        this.notifications = notifications;
     }
 
-    public class ViewCard extends RecyclerView.ViewHolder{
+    @Override
+    public int getItemCount() {
+        return projects.size();
+    }
+
+    public class ViewCard extends RecyclerView.ViewHolder {
 
         private CardView card;
+
         public ViewCard(CardView v) {
             super(v);
             this.card = v;

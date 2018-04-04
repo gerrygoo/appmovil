@@ -18,7 +18,8 @@ public class User implements Parcelable{
     private String Name;
     private String Company;
     private ArrayList<String> Skills; //Probably own class
-    private ArrayList<Project> Projects;
+    private ArrayList<Project> ProjectsMember;
+    private ArrayList<Project> ProjectsOwned;
     private HashMap<String, Boolean> ReviewedProjects;
     private HashMap<Project, Boolean> Notifications;
 
@@ -33,7 +34,8 @@ public class User implements Parcelable{
         Company = "";
         Rating = -1;
         Premium = false;
-        Projects = new ArrayList<>();
+        ProjectsMember = new ArrayList<>();
+        ProjectsOwned = new ArrayList<>();
         Notifications = new HashMap<>();
         ReviewedProjects = new HashMap<>();
         Skills = new ArrayList<>();
@@ -45,7 +47,8 @@ public class User implements Parcelable{
         Name = in.readString();
         Company = in.readString();
         Skills = in.createStringArrayList();
-        Projects = in.createTypedArrayList(Project.CREATOR);
+        ProjectsMember = in.createTypedArrayList(Project.CREATOR);
+        ProjectsOwned = in.createTypedArrayList(Project.CREATOR);
         Rating = in.readInt();
         Premium = in.readByte() != 0;
     }
@@ -63,11 +66,19 @@ public class User implements Parcelable{
     };
 
     public void addProject(Project ...projects){
-        Collections.addAll(Projects, projects);
+        Collections.addAll(ProjectsMember, projects);
     }
 
     public void addProjects(Project[] projects){
-        Collections.addAll(Projects, projects);
+        Collections.addAll(ProjectsMember, projects);
+    }
+
+    public void addProjectOwned(Project ...projects){
+        Collections.addAll(ProjectsOwned, projects);
+    }
+
+    public void addProjectsOwned(Project[] projects){
+        Collections.addAll(ProjectsOwned, projects);
     }
 
     public void setSkills(ArrayList<String> skills){
@@ -98,8 +109,12 @@ public class User implements Parcelable{
         return Skills;
     }
 
-    public ArrayList<Project> getProjects() {
-        return Projects;
+    public ArrayList<Project> getProjectsMember() {
+        return ProjectsMember;
+    }
+
+    public ArrayList<Project> getProjectsOwned() {
+        return ProjectsOwned;
     }
 
     public int getRating() {
@@ -114,8 +129,12 @@ public class User implements Parcelable{
         return Notifications;
     }
 
-    protected void setNotifications(HashMap<Project, Boolean> notifications) {
+    void setNotifications(HashMap<Project, Boolean> notifications) {
         Notifications = notifications;
+    }
+
+    void viewNotification(Project project){
+        Notifications.put(project, true);
     }
 
     public boolean hasReviewedProject(String projectUID) {
@@ -156,7 +175,7 @@ public class User implements Parcelable{
         parcel.writeString(Name);
         parcel.writeString(Company);
         parcel.writeStringList(Skills);
-        parcel.writeTypedList(Projects);
+        parcel.writeTypedList(ProjectsMember);
         parcel.writeInt(Rating);
         parcel.writeByte((byte) (Premium ? 1 : 0));
     }

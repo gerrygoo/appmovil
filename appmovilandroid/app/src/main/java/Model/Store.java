@@ -21,6 +21,7 @@ public class Store implements IStore {
 
     private Random random;
 
+    //this has to be package private.
     Store(){
         random = new Random();
         passwords = new HashMap<>();
@@ -40,7 +41,7 @@ public class Store implements IStore {
     @Override
     public User getUser(String uid) {
         for(User user: users){
-            if(Objects.equals(user.getUID(), uid)){
+            if(user.getUID().equals(uid)){
                 return user;
             }
         }
@@ -78,13 +79,13 @@ public class Store implements IStore {
     }
 
     @Override
-    public User authenticate(String username, String password) throws Errors.AuthException {
-        if(username.isEmpty() || password.isEmpty()){
+    public User authenticate(String email, String password) throws Errors.AuthException {
+        if(email.isEmpty() || password.isEmpty()){
             throw new Errors.AuthException("username or password missing", Errors.AuthError.MissingItems);
         }
         for(User user: users){
-            if(Objects.equals(user.getEmail(), username)){
-                if(Objects.equals(password, passwords.get(user))){
+            if(user.getEmail().equals(email)){
+                if(password.equals(passwords.get(user))){
                     return user;
                 }
                 throw new Errors.AuthException("username or password missing", Errors.AuthError.InvalidUsername);

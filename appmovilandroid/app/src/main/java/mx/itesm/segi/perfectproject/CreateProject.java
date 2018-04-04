@@ -174,7 +174,6 @@ public class CreateProject extends Fragment {
                 Positions.setText("");
                 Location.setText("");
                 Description.setText("");
-                Create.setText("");
             } catch (Errors.CreateProjectException exception) {
                 Snackbar.make(v, exception.getMessage(), Snackbar.LENGTH_LONG).show();
             }

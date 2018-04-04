@@ -39,5 +39,11 @@
     <string name="propmt_email_confirm">Email (confirm)</string>
     <string name="prompt_password_hint">Password</string>
     <string name="prompt_password_confirm_hint">Password (Confirm)</string>
+    <string name="str_title">Title</string>
+    <string name="str_startDate">Start Date</string>
+    <string name="str_endDate">End Date</string>
+    <string name="str_positions">Positions</string>
+    <string name="str_location">Location</string>
+    <string name="str_description">Description</string>
     <string name="prompt_name">Complete name</string>
 </resources>

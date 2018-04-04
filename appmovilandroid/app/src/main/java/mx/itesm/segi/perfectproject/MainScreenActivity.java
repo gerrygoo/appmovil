@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Choreographer;
@@ -21,19 +22,20 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import Model.Model;
 import Model.IModel;
 import Model.Project;
 
-public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener{
+public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener {
 
+    public static final String BACK_STACK = "Main Activity Back";
     private final long duration = 100;
     private final boolean EMPLOYEE = false, EMPLOYER = true;
     private final int INITIAL_MENU_ITEM = 1;
     private float startingX, startingY, initialTouchX, initialTouchY;
     private boolean accountMode = EMPLOYEE;
+
     private Fragment[] activeFragments;
     private View[] views;
 
@@ -111,14 +113,11 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
             }
         });
 
-
         model = Model.getInstance();
-
         views = new View[]{
                 findViewById(R.id.fragmentPlacer),
                 findViewById(R.id.fragmentPlacerDraggable),
         };
-        projects = model.getAvailableProjects();
 
         renderBrowse();
 
@@ -127,7 +126,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         navigation.getMenu().getItem(INITIAL_MENU_ITEM).setChecked(true);
     }
 
-    private Fragment projectToCard(Project project){
+    public static Fragment projectToCard(Project project){
         Fragment card = new ProjectCard();
         Bundle args = new Bundle();
         args.putParcelable(ProjectCard.ARG_PROJECT, project);
@@ -148,13 +147,13 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
                     renderBrowse();
                 }else {
                     usingFragments();
-                    renderNotifications();
+                    renderYourProjects(true);
                 }
                 return true;
-            case R.id.navigation_notifications:
+            case R.id.navigation_myprojects:
                 usingFragments();
                 if(accountMode == EMPLOYEE) {
-                    renderNotifications();
+                    renderYourProjects(false);
                 } else {
                     renderCreateProject();
                 }
@@ -177,6 +176,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void renderBrowse(){
+        currentProject = 0;
         this.projects = model.getAvailableProjects();
         renderCards(currentProject, currentProject+1);
     }
@@ -204,15 +204,15 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         activeFragments = new Fragment[]{newProject};
     }
 
-    private void renderNotifications(){
-        Bundle argNotifications = new Bundle();
-        argNotifications.putStringArray("dates", new String[]{Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString()});
-        argNotifications.putStringArray("titles", new String[]{"Notification 1", "Notification 2", "Notification 3"});
-        argNotifications.putStringArray("descriptions", new String[]{"Description 1", "Description 2", "Description 3"});
-        argNotifications.putBooleanArray("news", new boolean[]{true, false, true});
-        Fragment notifications = new NotificationFrag();
-        notifications.setArguments(argNotifications);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, notifications).commit();
+    private void renderYourProjects(boolean owned){
+        Fragment yourProjects = new YourProjectsFrag();
+        Bundle argYourProjects = new Bundle();
+
+        argYourProjects.putParcelable(YourProjectsFrag.ARG_USER, Model.getInstance().getCurrentUser());
+        argYourProjects.putBoolean(YourProjectsFrag.ARG_OWNED, owned);
+
+        yourProjects.setArguments(argYourProjects);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, yourProjects).commit();
     }
 
     private AnimatorSet animateDragTo(float x, float y){
@@ -230,6 +230,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     public void handleYes(){
+        Model.getInstance().reviewProject(projects.get(currentProject), true);
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         animateDragTo(+screenWidth, startingY).addListener(new Animator.AnimatorListener() {
             @Override
@@ -256,6 +257,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     public void handleNo(){
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+        Model.getInstance().reviewProject(projects.get(currentProject), false);
         animateDragTo(-screenWidth, startingY).addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
@@ -305,6 +307,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void clearFragments(){
+        getSupportFragmentManager().popBackStackImmediate(MainScreenActivity.BACK_STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         for(Fragment f: activeFragments) {
             getSupportFragmentManager().beginTransaction().remove(f).commit();
         }
@@ -322,8 +325,8 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         if(accountMode == EMPLOYEE){
             menu.getItem(1).setIcon(R.drawable.ic_home_black_24dp);
             menu.getItem(1).setTitle(R.string.navigation_browse);
-            menu.getItem(2).setIcon(R.drawable.ic_notifications_black_24dp);
-            menu.getItem(2).setTitle(R.string.navigation_notifications);
+            menu.getItem(2).setIcon(R.drawable.ic_work_black_24dp);
+            menu.getItem(2).setTitle(R.string.navigation_my_projects);
         }else {
             menu.getItem(1).setIcon(R.drawable.ic_work_black_24dp);
             menu.getItem(1).setTitle(R.string.navigation_my_projects);
