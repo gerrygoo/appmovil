@@ -20,8 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
+import Model.Model;
+import Model.IModel;
 import Model.Project;
 
 public class MainScreenActivity extends AppCompatActivity implements ProfileFrag.OnSwitchToggleListener, ProjectCard.OnCardButtonClickListener{
@@ -35,18 +38,9 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     private View[] views;
 
     private int currentProject = 0;
-    private final Project[] projects = new Project[]{
-            MicrosoftProject(),
-            GoogleProject(),
-            MicrosoftProject(),
-            GoogleProject(),
-            MicrosoftProject(),
-            GoogleProject(),
-            MicrosoftProject(),
-            GoogleProject(),
-            MicrosoftProject(),
-            GoogleProject()
-    };
+    private ArrayList<Project> projects;
+
+    private IModel model;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -117,11 +111,20 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
             }
         });
 
-        renderBrowse();
+
+        model = Model.getInstance();
+        try {
+            model.authenticate("iansa", "iansa");
+        } catch (Exception e){
+            Log.i("Login in","not available");
+        }
         views = new View[]{
                 findViewById(R.id.fragmentPlacer),
                 findViewById(R.id.fragmentPlacerDraggable),
         };
+        projects = model.getAvailableProjects();
+
+        renderBrowse();
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -134,40 +137,6 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         args.putParcelable(ProjectCard.ARG_PROJECT, project);
         card.setArguments(args);
         return card;
-    }
-
-    private Project GoogleProject(){
-        Calendar endDate = Calendar.getInstance();
-        endDate.add(Calendar.MONTH, 10);
-        return new Project(
-                "12345",
-                null,
-                "Smart Cars",
-                "https://pmcvariety.files.wordpress.com/2015/08/google-placeholder-logo.jpg?w=1000&h=563&crop=1",
-                new String[]{ "Programmer", "Product Manager", "Experience Designer" },
-                "The project focuses on building a self driving car, in which you are required to know Machine Learning and Artificial Intelligence Algorithms in order to be eligible for this project",
-                "Mountain View, California, United States",
-                Calendar.getInstance().getTime(),
-                endDate.getTime());
-    }
-
-    private Project MicrosoftProject(){
-        Calendar endDate = Calendar.getInstance();
-        endDate.add(Calendar.MONTH, 18);
-
-        Calendar startDate = Calendar.getInstance();
-        endDate.add(Calendar.MONTH, 8);
-
-        return new Project(
-                "12321",
-                null,
-                "Cortana Search",
-                "https://mspoweruser.com/wp-content/uploads/2016/09/Webgroesse_HighRes_Microsoft12711.jpg",
-                new String[]{ "Programmer", "Program Manager", "Tester" },
-                "This project focuses on implementing a Natural Language search for Cortana, for this we require that you have knowledge and background on Natural Language Processing or Artificial Intelligence",
-                "Redmond, Washington, United States",
-                startDate.getTime(),
-                endDate.getTime());
     }
 
     private boolean handleNavigation(int id){
@@ -211,18 +180,19 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void renderBrowse(){
+        this.projects = model.getAvailableProjects();
         renderCards(currentProject, currentProject+1);
     }
 
     private void renderCards(int first, int second){
         Fragment top, bottom;
-        if(first < projects.length) {
-            top = projectToCard(projects[first]);
+        if(first < projects.size()) {
+            top = projectToCard(projects.get(first));
         } else {
             top = new Fragment();
         }
-        if(second < projects.length) {
-            bottom = projectToCard(projects[second]);
+        if(second < projects.size()) {
+            bottom = projectToCard(projects.get(second));
         } else {
             bottom = new Fragment();
         }
