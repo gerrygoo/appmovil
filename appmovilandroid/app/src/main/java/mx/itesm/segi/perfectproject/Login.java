@@ -4,10 +4,14 @@ import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import Model.*;
 
 public class Login extends AppCompatActivity {
+
+    public static Store StoreRef = new Store();
 
     private TextInputEditText emailTxt;
     private TextInputEditText passwordTxt;
@@ -37,22 +41,28 @@ public class Login extends AppCompatActivity {
         });
     }
 
-
-    private boolean authenticate(String email, String password){
-        return !email.isEmpty() && !password.isEmpty();
-    }
-
     private void handleSubmit() {
         String
                 email = emailTxt.getText().toString(),
                 password = passwordTxt.getText().toString();
 
-        if ( authenticate(email, password) ) {
 
-            startActivity(new Intent(this, MainScreenActivity.class));
-        } else {
 
-            errorText.setText("Given credentials failed to authenticate.");
+
+        if ( !email.isEmpty() && !password.isEmpty() ) {
+
+            User user;
+            try {
+                user = StoreRef.authenticate(email, password);
+
+                //write local user
+                Log.d("Logged with: ", user.toString() );
+
+
+
+            } catch (Errors.AuthException e) {
+                errorText.setText( e.getMessage() );
+            }
         }
 
     }

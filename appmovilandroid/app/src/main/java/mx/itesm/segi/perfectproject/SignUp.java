@@ -4,8 +4,13 @@ import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import org.xml.sax.helpers.LocatorImpl;
+
+import Model.*;
 
 public class SignUp extends AppCompatActivity {
 
@@ -33,7 +38,7 @@ public class SignUp extends AppCompatActivity {
         });
     }
 
-    private boolean authenticate(String email, String emailConfirm, String password, String passwordConfirm){
+    private boolean fieldsValid(String email, String emailConfirm, String password, String passwordConfirm){
         return !email.isEmpty()
                 && !password.isEmpty()
                 && !emailConfirm.isEmpty()
@@ -49,11 +54,24 @@ public class SignUp extends AppCompatActivity {
                 password = passwordTxt.getText().toString(),
                 passwordConfirm = passwordConfirmTxt.getText().toString();
 
-        if ( authenticate(email, emailComfirm, password, passwordConfirm) ) {
-
+        if ( fieldsValid(email, emailComfirm, password, passwordConfirm) ) {
+            try {
+                Login.StoreRef.register(
+                        new User(
+                                Integer.toString( email.hashCode() ),
+                                email,
+                                email,
+                                email,
+                                email,
+                                0,
+                                false
+                                ),
+                password);
+            } catch ( Errors.RegisterException e ) {
+                errorText.setText( e.getMessage() );
+            }
             startActivity(new Intent(this, MainScreenActivity.class));
         } else {
-
             errorText.setText("Incoeherent data entered.");
         }
 

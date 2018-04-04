@@ -21,7 +21,7 @@ public class Store implements IStore {
 
     private Random random;
 
-    Store(){
+    public Store(){
         random = new Random();
         passwords = new HashMap<>();
         users = new ArrayList<>();
