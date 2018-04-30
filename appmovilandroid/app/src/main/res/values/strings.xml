@@ -46,4 +46,5 @@
     <string name="str_location">Location</string>
     <string name="str_description">Description</string>
     <string name="prompt_name">Complete name</string>
+    <string name="company">Company</string>
 </resources>

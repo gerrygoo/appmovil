@@ -17,7 +17,7 @@ public class SignUp extends AppCompatActivity {
     private TextInputEditText
             emailTxt, emailConfirmTxt,
             passwordTxt, passwordConfirmTxt,
-            nameTxt;
+            nameTxt, companyTxt;
 
 
     @Override
@@ -30,6 +30,7 @@ public class SignUp extends AppCompatActivity {
         passwordTxt = findViewById(R.id.password);
         passwordConfirmTxt = findViewById(R.id.password_2);
         nameTxt = findViewById(R.id.name);
+        companyTxt = findViewById(R.id.company);
 
         findViewById(R.id.submitBtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,7 +46,8 @@ public class SignUp extends AppCompatActivity {
                 emailConfirm = emailConfirmTxt.getText().toString(),
                 password = passwordTxt.getText().toString(),
                 passwordConfirm = passwordConfirmTxt.getText().toString(),
-                name = nameTxt.getText().toString();
+                name = nameTxt.getText().toString(),
+                company = companyTxt.getText().toString();
 
         if (email.isEmpty())
         {
