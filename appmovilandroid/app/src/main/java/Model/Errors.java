@@ -22,6 +22,7 @@ public class Errors {
     public enum CreateProjectError {
         MissingItems,
         InvalidProject,
+        InvalidImage
     }
 
     public static class AuthException extends Exception{
