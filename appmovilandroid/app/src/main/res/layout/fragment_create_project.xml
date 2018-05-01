@@ -31,14 +31,17 @@
                 android:weightSum="1">
 
                 <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="0.20">
 
                     <ImageButton
                         android:id="@+id/btnLogoImage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:background="@android:drawable/btn_default"
+                        android:scaleType="fitCenter"
                         android:src="@android:drawable/ic_menu_camera" />
 
                 </FrameLayout>
@@ -47,7 +50,7 @@
                     android:id="@+id/etTitle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_weight="0.8"
                     android:ems="10"
                     android:gravity="center"
                     android:hint="Add title"
@@ -66,24 +69,24 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:clickable="true"
                     android:ems="10"
+                    android:focusable="false"
                     android:hint="Add start date"
                     android:inputType="date"
-                    android:textSize="14sp"
-                    android:clickable="true"
-                    android:focusable="false"/>
+                    android:textSize="14sp" />
 
                 <EditText
                     android:id="@+id/etEndDate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:clickable="true"
                     android:ems="10"
+                    android:focusable="false"
                     android:hint="Add end date"
                     android:inputType="date"
-                    android:textSize="14sp"
-                    android:clickable="true"
-                    android:focusable="false"/>
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
