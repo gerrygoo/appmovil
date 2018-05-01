@@ -3,10 +3,14 @@ package mx.itesm.segi.perfectproject;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
-import android.service.quicksettings.Tile;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -20,13 +24,15 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import Model.Errors;
 import Model.Model;
 import Model.Project;
-import Model.Errors;
 
 
 /**
@@ -53,8 +59,10 @@ public class CreateProject extends Fragment {
     private EditText Location;
     private EditText Description;
     private Button Create;
+    private Bitmap BMimage;
 
     private boolean shouldPutImage;
+    private static final int PICK_PHOTO_FOR_AVATAR = 1;
 
 
     public CreateProject() {
@@ -88,6 +96,8 @@ public class CreateProject extends Fragment {
         Create = result.findViewById(R.id.btnCreate);
 
         myCalendar = Calendar.getInstance();
+        Logo.setBackground(getResources().getDrawable(android.R.drawable.btn_default));
+        ImageUrl="";
 
         StartDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,13 +141,36 @@ public class CreateProject extends Fragment {
     }
 
     public void setImage(View v) {
-        ImageUrl = "https://mspoweruser.com/wp-content/uploads/2016/09/Webgroesse_HighRes_Microsoft12711.jpg";
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_PHOTO_FOR_AVATAR);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_PHOTO_FOR_AVATAR && resultCode == Activity.RESULT_OK) {
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
+                BMimage = BitmapFactory.decodeStream(inputStream);
+                Log.i("Imagen Guardada: ", inputStream.toString());
+                Drawable d = new BitmapDrawable(getResources(), BMimage);
+                Logo.setBackground(d);
+                ImageUrl=" ";
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
+        }
+        else if(resultCode==Activity.RESULT_CANCELED){
+            ImageUrl="";
+        }
     }
 
     public void create(View v) throws ParseException {
         if (Title.length() == 0) {
             Snackbar.make(v, "Insert title", Snackbar.LENGTH_LONG).show();
-        } else if (ImageUrl == null) {
+        } else if (ImageUrl.length() == 0) {
             Snackbar.make(v, "Insert logo", Snackbar.LENGTH_LONG).show();
         } else if (StartDate.length() == 0) {
             Snackbar.make(v, "Insert start date", Snackbar.LENGTH_LONG).show();
@@ -157,7 +190,7 @@ public class CreateProject extends Fragment {
                     "1234",
                     Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),
-                    ImageUrl,
+                    BMimage,
                     PositionsArr,
                     Description.getText().toString(),
                     Location.getText().toString(),
@@ -168,7 +201,8 @@ public class CreateProject extends Fragment {
             try {
                 Model.getInstance().createProject(project);
                 Title.setText("");
-                ImageUrl = "";
+                Logo.setBackground(getResources().getDrawable(android.R.drawable.btn_default));
+                ImageUrl="";
                 StartDate.setText("");
                 EndDate.setText("");
                 Positions.setText("");

@@ -34,8 +34,20 @@ public class Store implements IStore {
         passwords.put(users.get(0), "iansa");
         passwords.put(users.get(1), "gerrygoo");
 
-        projects.add(MicrosoftProject());
-        projects.add(GoogleProject());
+        int index = 0;
+
+        projects.add(MicrosoftProject(index++));
+        projects.add(GoogleProject(index++));
+        projects.add(MicrosoftProject(index++));
+        projects.add(GoogleProject(index++));
+        projects.add(MicrosoftProject(index++));
+        projects.add(GoogleProject(index++));
+        projects.add(MicrosoftProject(index++));
+        projects.add(GoogleProject(index++));
+        projects.add(MicrosoftProject(index++));
+        projects.add(GoogleProject(index++));
+        projects.add(MicrosoftProject(index++));
+        projects.add(GoogleProject(index++));
     }
 
     @Override
@@ -178,13 +190,13 @@ public class Store implements IStore {
         Log.e("Project", "Project Added: " + projects.size() +" items");
     }
 
-    private Project GoogleProject(){
+    private Project GoogleProject(int index){
         Calendar endDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 10);
         return new Project(
                 random.nextInt(100000) + "",
                 null,
-                "Smart Cars",
+                "Smart Cars" + index,
                 "https://pmcvariety.files.wordpress.com/2015/08/google-placeholder-logo.jpg?w=1000&h=563&crop=1",
                 new String[]{ "Programmer", "Product Manager", "Experience Designer" },
                 "The project focuses on building a self driving car, in which you are required to know Machine Learning and Artificial Intelligence Algorithms in order to be eligible for this project",
@@ -193,7 +205,7 @@ public class Store implements IStore {
                 endDate.getTime());
     }
 
-    private Project MicrosoftProject(){
+    private Project MicrosoftProject(int index){
         Calendar endDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 18);
 
@@ -203,7 +215,7 @@ public class Store implements IStore {
         return new Project(
                 random.nextInt(100000) + "",
                 null,
-                "Cortana Search",
+                "Cortana Search" + index,
                 "https://mspoweruser.com/wp-content/uploads/2016/09/Webgroesse_HighRes_Microsoft12711.jpg",
                 new String[]{ "Programmer", "Program Manager", "Tester" },
                 "This project focuses on implementing a Natural Language search for Cortana, for this we require that you have knowledge and background on Natural Language Processing or Artificial Intelligence",

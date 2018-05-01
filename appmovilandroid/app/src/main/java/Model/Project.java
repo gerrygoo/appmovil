@@ -60,6 +60,24 @@ public class Project implements Parcelable{
         new Project.DownloadImageFromURL().execute(imageUrl);
     }
 
+    public Project(String uid, User owner, String title, Bitmap image, String[] positions, String description,String location, Date startDate, Date endDate) {
+        UID = uid;
+        Owner = owner;
+        Title = title;
+        Image = image;
+        Positions = positions;
+        Description = description;
+        Location = location;
+        StartDate = startDate;
+        EndDate = endDate;
+
+        Team = new ArrayList<>();
+        Applicants = new ArrayList<>();
+
+        finishLoadingImage = true;
+        //new Project.DownloadImageFromIS().execute(inputStream);
+    }
+
     protected Project(Parcel in) {
         Title = in.readString();
         ImageUrl = in.readString();
@@ -100,6 +118,11 @@ public class Project implements Parcelable{
         }
     }
 
+    public static Bitmap getBitmapFromIS(InputStream is) {
+        Bitmap myBitmap = BitmapFactory.decodeStream(is);
+        return myBitmap;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -121,6 +144,23 @@ public class Project implements Parcelable{
         @Override
         protected Bitmap doInBackground(String... strings) {
             return getBitmapFromURL(strings[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            Image = bitmap;
+            finishLoadingImage = true;
+            if(imageListener != null){
+                imageListener.onImageAvailable(bitmap);
+            }
+        }
+    }
+
+    private class DownloadImageFromIS extends AsyncTask<InputStream, Void, Bitmap>{
+
+        @Override
+        protected Bitmap doInBackground(InputStream... inputStreams) {
+            return getBitmapFromIS(inputStreams[0]);
         }
 
         @Override

@@ -35,6 +35,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     private final int INITIAL_MENU_ITEM = 1;
     private float startingX, startingY, initialTouchX, initialTouchY;
     private boolean accountMode = EMPLOYEE;
+    private boolean transitioning = false;
 
     private Fragment[] activeFragments;
     private View[] views;
@@ -230,6 +231,9 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     public void handleYes(){
+        if(transitioning || currentProject >= projects.size()) {
+            return;
+        }
         Model.getInstance().reviewProject(projects.get(currentProject), true);
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         animateDragTo(+screenWidth, startingY).addListener(new Animator.AnimatorListener() {
@@ -256,6 +260,9 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     public void handleNo(){
+        if(transitioning || currentProject >= projects.size()) {
+            return;
+        }
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         Model.getInstance().reviewProject(projects.get(currentProject), false);
         animateDragTo(-screenWidth, startingY).addListener(new Animator.AnimatorListener() {
@@ -283,6 +290,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     private void changeCards(){
         currentProject++;
+        transitioning = true;
         renderCards(currentProject, currentProject);
         Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
             @Override
@@ -291,6 +299,13 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
                 draggableView.setX(startingX);
                 draggableView.setY(startingY);
                 renderBrowse();
+
+                Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+                    @Override
+                    public void doFrame(long l) {
+                        transitioning = false;
+                    }
+                });
             }
         });
     }
