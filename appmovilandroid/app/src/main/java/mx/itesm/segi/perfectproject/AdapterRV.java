@@ -75,6 +75,7 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
             for(int i =0;i < applicants.size();i++)
             {
                 LinearLayout applicantCard = new LinearLayout(card.getContext());
+                applicantCard.setPadding(8,8,8,8);
                 applicantCard.setOrientation(LinearLayout.HORIZONTAL);
                 final int index = i;
                 applicantCard.setOnClickListener(new View.OnClickListener() {
