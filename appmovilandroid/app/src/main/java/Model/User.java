@@ -1,5 +1,6 @@
 package Model;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -17,13 +18,14 @@ public class User implements Parcelable{
     private String Email;
     private String Name;
     private String Company;
+    private Bitmap ProfPic;
     private ArrayList<String> Skills; //Probably own class
     private ArrayList<Project> ProjectsMember;
     private ArrayList<Project> ProjectsOwned;
     private HashMap<String, Boolean> ReviewedProjects;
     private HashMap<Project, Boolean> Notifications;
 
-    private int Rating;
+    private float Rating;
     private boolean Premium;
 
     public User(String email, String name) {
@@ -32,7 +34,7 @@ public class User implements Parcelable{
 
         UID = "";
         Company = "";
-        Rating = -1;
+        Rating = 4;
         Premium = false;
         ProjectsMember = new ArrayList<>();
         ProjectsOwned = new ArrayList<>();
@@ -105,6 +107,18 @@ public class User implements Parcelable{
         return Company;
     }
 
+    public void setRating(float rating) {
+        Rating = rating;
+    }
+
+    public void setCompany(String company) {
+        Company = company;
+    }
+
+    public Bitmap getProfPic() {
+        return ProfPic;
+    }
+
     public ArrayList<String> getSkills() {
         return Skills;
     }
@@ -117,7 +131,7 @@ public class User implements Parcelable{
         return ProjectsOwned;
     }
 
-    public int getRating() {
+    public float getRating() {
         return Rating;
     }
 
@@ -153,6 +167,10 @@ public class User implements Parcelable{
         ReviewedProjects = reviewedProjects;
     }
 
+    public void setProfPic(Bitmap profPic) {
+        ProfPic = profPic;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof User){
@@ -176,7 +194,7 @@ public class User implements Parcelable{
         parcel.writeString(Company);
         parcel.writeStringList(Skills);
         parcel.writeTypedList(ProjectsMember);
-        parcel.writeInt(Rating);
+        parcel.writeFloat(Rating);
         parcel.writeByte((byte) (Premium ? 1 : 0));
     }
 }

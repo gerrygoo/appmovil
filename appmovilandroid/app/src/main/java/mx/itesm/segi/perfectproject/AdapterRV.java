@@ -1,13 +1,10 @@
 package mx.itesm.segi.perfectproject;
 
-import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -55,12 +52,12 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
         TextView tvTitle = card.findViewById(R.id.projectCard_Title);
         TextView tvStartDate = card.findViewById(R.id.projectCard_startDate);
         TextView tvEndDate = card.findViewById(R.id.projectCard_endDate);
-
+        ImageView ivImage = card.findViewById(R.id.projectCard_Logo);
         DateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
         
         tvTitle.setText(currentProject.getTitle());
         tvStartDate.setText(dateFormatter.format(currentProject.getStartDate()));
-        
+        ivImage.setImageBitmap(currentProject.getImage());
         tvEndDate.setText(dateFormatter.format(currentProject.getEndDate()));
 
         if (owned || notifications == null || (notifications.containsKey(currentProject) && !notifications.get(currentProject))) {
