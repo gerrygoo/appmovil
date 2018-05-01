@@ -1,6 +1,8 @@
 package mx.itesm.segi.perfectproject;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Model.Project;
+import Model.User;
 
 
 public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
@@ -43,7 +47,7 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
     @Override
     public void onBindViewHolder(final ViewCard holder, final int position) {
         CardView card = holder.card;
-        Project currentProject = projects.get(position);
+        final Project currentProject = projects.get(position);
 
         card.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,6 +64,51 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
         
         tvTitle.setText(currentProject.getTitle());
         tvStartDate.setText(dateFormatter.format(currentProject.getStartDate()));
+
+        if(owned)
+        {
+            LinearLayout container = card.findViewById(R.id.project_card_container);
+            final ArrayList<User> applicants = currentProject.getApplicants();
+            for(int i =0;i < applicants.size();i++)
+            {
+                LinearLayout applicantCard = new LinearLayout(card.getContext());
+                applicantCard.setOrientation(LinearLayout.HORIZONTAL);
+                final int index = i;
+                applicantCard.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        /** ADD TO THE LISTENER INTERFACE THE METHOD THAT LOOKS FOR A PROFILE AND SEND THE USER IDENTIFIER TO THAT METHOD **/
+                        Log.d("AdapterRV", "Look for profile " + applicants.get(index).toString());
+                    }
+                });
+
+                TextView name = new TextView(card.getContext());
+                name.setText(applicants.get(i).getName());
+                applicantCard.addView(name);
+
+                Button accept = new Button(card.getContext());
+                accept.setText("Accept");
+                accept.setBackgroundColor(card.getResources().getColor(R.color.holo_green_dark));
+                accept.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Model.Model.getInstance().reviewApplicant(currentProject, applicants.get(index), true);
+                    }
+                });
+
+                Button deny = new Button(card.getContext());
+                deny.setText("Deny");
+                deny.setBackgroundColor(card.getResources().getColor(R.color.holo_red_dark));
+                deny.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Model.Model.getInstance().reviewApplicant(currentProject, applicants.get(index), false);
+                    }
+                });
+
+                container.addView(applicantCard);
+            }
+        }
         
         tvEndDate.setText(dateFormatter.format(currentProject.getEndDate()));
 

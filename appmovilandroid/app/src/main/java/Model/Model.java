@@ -111,6 +111,7 @@ public class Model implements IModel {
     @Override
     public void reviewProject(Project project, boolean accept) {
         currentUser.reviewProject(project, accept);
+        if(accept)project.addApplicant(currentUser);
         Store.updateUser(currentUser);
     }
 
