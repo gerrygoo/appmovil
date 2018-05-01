@@ -76,6 +76,11 @@ public class YourProjectsFrag extends Fragment {
             public void clearNew(int position) {
                 Model.getInstance().viewNotificaction(projects.get(position));
             }
+
+            @Override
+            public void reloadYourProjects() {
+                loadProjects();
+            }
         };
     }
 
@@ -88,6 +93,7 @@ public class YourProjectsFrag extends Fragment {
             this.projects = user.getProjectsOwned();
             adapterRV = new AdapterRV(user.getProjectsOwned(), true, listener);
         } else {
+            this.projects = user.getProjectsMember();
             adapterRV = new AdapterRV(user.getProjectsMember(), false, listener);
             adapterRV.setNotifications(user.getNotifications());
         }
@@ -95,7 +101,11 @@ public class YourProjectsFrag extends Fragment {
     }
 
     private void renderProject(int position) {
-        Fragment fragment = MainScreenActivity.projectToCard(projects.get(position));
+        Fragment fragment = new ProjectInfoFrag();
+        Bundle args = new Bundle();
+        args.putParcelable(ProjectInfoFrag.ARG_PROJECT, projects.get(position));
+        args.putBoolean(ProjectInfoFrag.ARG_OWNED, owned);
+        fragment.setArguments(args);
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, fragment).addToBackStack(MainScreenActivity.BACK_STACK);
         transaction.commit();
     }
@@ -103,6 +113,7 @@ public class YourProjectsFrag extends Fragment {
     static interface Listener{
         void itemClicked(long id);
         void clearNew(int position);
+        void reloadYourProjects();
     }
 
     @Override

@@ -1,15 +1,18 @@
 package mx.itesm.segi.perfectproject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -83,6 +86,11 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                 });
 
                 TextView name = new TextView(card.getContext());
+                name.setPadding(8, 8, 8, 8);
+                name.setTextSize(20);
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                ((Activity)card.getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                name.setWidth(displayMetrics.widthPixels/3);
                 name.setText(applicants.get(i).getName());
                 applicantCard.addView(name);
 
@@ -93,8 +101,10 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                     @Override
                     public void onClick(View view) {
                         Model.Model.getInstance().reviewApplicant(currentProject, applicants.get(index), true);
+                        listener.reloadYourProjects();
                     }
                 });
+                applicantCard.addView(accept);
 
                 Button deny = new Button(card.getContext());
                 deny.setText("Deny");
@@ -103,8 +113,10 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                     @Override
                     public void onClick(View view) {
                         Model.Model.getInstance().reviewApplicant(currentProject, applicants.get(index), false);
+                        listener.reloadYourProjects();
                     }
                 });
+                applicantCard.addView(deny);
 
                 container.addView(applicantCard);
             }
