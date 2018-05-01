@@ -1,6 +1,5 @@
 package mx.itesm.segi.perfectproject;
 
-<<<<<<< HEAD
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -14,13 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-=======
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
->>>>>>> Origin/EditProject
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -75,7 +67,6 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
         
         tvTitle.setText(currentProject.getTitle());
         tvStartDate.setText(dateFormatter.format(currentProject.getStartDate()));
-<<<<<<< HEAD
 
         if(owned)
         {
@@ -131,10 +122,7 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                 container.addView(applicantCard);
             }
         }
-        
-=======
         ivImage.setImageBitmap(currentProject.getImage());
->>>>>>> Origin/EditProject
         tvEndDate.setText(dateFormatter.format(currentProject.getEndDate()));
 
         if (owned || notifications == null || (notifications.containsKey(currentProject) && !notifications.get(currentProject))) {
