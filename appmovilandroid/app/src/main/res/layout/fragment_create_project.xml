@@ -46,16 +46,20 @@
 
                 </FrameLayout>
 
-                <EditText
-                    android:id="@+id/etTitle"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.8"
-                    android:ems="10"
-                    android:gravity="center"
-                    android:hint="Add title"
-                    android:inputType="textPersonName"
-                    android:textSize="24sp" />
+                    android:layout_weight="0.8">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/etTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:ems="10"
+                        android:hint="@string/str_title"
+                        android:textSize="24sp" />
+                </android.support.design.widget.TextInputLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -64,61 +68,71 @@
                 android:layout_weight="0"
                 android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/etStartDate"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:clickable="true"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:hint="Add start date"
-                    android:inputType="date"
-                    android:textSize="14sp" />
+                    android:clickable="true">
 
-                <EditText
-                    android:id="@+id/etEndDate"
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/etStartDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:hint="@string/str_startDate" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:clickable="true"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:hint="Add end date"
-                    android:inputType="date"
-                    android:textSize="14sp" />
+                    android:clickable="true">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/etEndDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:hint="@string/str_endDate" />
+                </android.support.design.widget.TextInputLayout>
 
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/etPositions"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:ems="10"
-                android:hint="Add positions"
-                android:inputType="textPersonName"
-                android:textSize="14sp" />
+                android:layout_height="match_parent"
+                android:layout_weight="0">
 
-            <EditText
-                android:id="@+id/etLocation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:ems="10"
-                android:hint="Add location"
-                android:inputType="textPersonName"
-                android:textSize="14sp" />
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/etPositions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/str_positions" />
+            </android.support.design.widget.TextInputLayout>
 
-            <EditText
-                android:id="@+id/etDescription"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:ems="10"
-                android:hint="Add description"
-                android:inputType="textPersonName"
-                android:textSize="14sp" />
+                android:layout_height="match_parent"
+                android:layout_weight="0">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/etLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/str_location" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/etDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/str_description" />
+            </android.support.design.widget.TextInputLayout>
 
             <Button
                 android:id="@+id/btnCreate"

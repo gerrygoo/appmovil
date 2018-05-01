@@ -32,7 +32,7 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
     private HashMap<Project, Boolean> notifications;
     private boolean owned;
 
-    YourProjectsFrag.Listener listener;
+    private YourProjectsFrag.Listener listener;
 
     public AdapterRV(ArrayList<Project> projects, Boolean owned, YourProjectsFrag.Listener listener) {
         this.projects = projects;

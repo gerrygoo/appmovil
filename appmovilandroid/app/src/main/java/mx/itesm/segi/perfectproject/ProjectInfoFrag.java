@@ -1,6 +1,8 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +21,7 @@ import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
+import Model.Model;
 import Model.Project;
 import Model.User;
 
@@ -82,7 +85,7 @@ public class ProjectInfoFrag extends Fragment {
         for(int i = 0;i < positions.length;i++)
         {
             positionsText += positions[i];
-            if(i!=positions.length-1) positionsText += "\n";
+            if(i!=positions.length-1) positionsText += " ";
         }
         tvPositions.setText(positionsText);
         tvLocation.setText(project.getLocation());
@@ -111,14 +114,36 @@ public class ProjectInfoFrag extends Fragment {
             fabEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    /** OPEN FRAGMENT TO EDIT PROJECT **/
+                    Fragment editProject = new CreateProject();
+                    Bundle argEditProject = new Bundle();
+                    argEditProject.putBoolean(CreateProject.ARG_EDITING, true);
+                    argEditProject.putParcelable(ARG_PROJECT, project);
+
+                    editProject.setArguments(argEditProject);
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, editProject).commit();
                 }
             });
 
             fabDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    /** CONFIRM AND DELETE**/
+                    AlertDialog.Builder confirm = new AlertDialog.Builder(getActivity());
+                    confirm.setTitle("Delete project");
+                    confirm.setMessage("Do you want to delete this project");
+                    confirm.setCancelable(false);
+                    confirm.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            deleteProject();
+                        }
+                    });
+                    confirm.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    confirm.show();
                 }
             });
         }
@@ -127,6 +152,18 @@ public class ProjectInfoFrag extends Fragment {
             fabEdit.setVisibility(View.INVISIBLE);
             fabDelete.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private void deleteProject() {
+        Model.getInstance().deleteProject(project);
+        Fragment yourProjects = new YourProjectsFrag();
+        Bundle argYourProjects = new Bundle();
+
+        argYourProjects.putParcelable(YourProjectsFrag.ARG_USER, Model.getInstance().getCurrentUser());
+        argYourProjects.putBoolean(YourProjectsFrag.ARG_OWNED, owned);
+
+        yourProjects.setArguments(argYourProjects);
+        getFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, yourProjects).commit();
     }
 
 }

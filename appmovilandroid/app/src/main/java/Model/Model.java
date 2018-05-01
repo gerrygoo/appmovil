@@ -116,4 +116,28 @@ public class Model implements IModel {
     }
 
 
+    public void updateProject(Project p, Project project) {
+        p.setTitle(project.getTitle());
+        p.setCompensation(project.getCompensation());
+        p.setDescription(project.getDescription());
+        p.setEndDate(project.getEndDate());
+        p.setStartDate(project.getStartDate());
+        p.setImage(project.getImage());
+        p.setLocation(project.getLocation());
+        p.setPositions(project.getPositions());
+        Store.updateProject(p);
+    }
+
+    public void deleteProject(Project project)
+    {
+        ArrayList<User> members = project.getTeam();
+        for(int i = 0;i < members.size();i++)
+        {
+            members.get(i).removeProjectMember(project);
+            Store.updateUser(members.get(i));
+        }
+        currentUser.removeProjectOwned(project);
+        Store.updateUser(currentUser);
+        Store.deleteProject(project);
+    }
 }

@@ -190,6 +190,11 @@ public class Store implements IStore {
         Log.e("Project", "Project Added: " + projects.size() +" items");
     }
 
+    public void deleteProject(Project project)
+    {
+        projects.remove(projects.indexOf(project));
+    }
+
     private Project GoogleProject(int index){
         Calendar endDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 10);

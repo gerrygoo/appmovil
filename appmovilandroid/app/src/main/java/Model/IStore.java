@@ -22,4 +22,5 @@ interface IStore {
 
     void updateUser(User user);
     void updateProject(Project project);
+    void deleteProject(Project project);
 }
