@@ -58,7 +58,7 @@ class FirebaseStore implements IStore {
     public void updateProject(Project project) {
 
     }
-
+  
     @Override
     public void deleteProject(Project project) {
 

@@ -113,6 +113,7 @@ public class Model implements IModel {
         currentUser.reviewProject(project, accept);
         if(accept)project.addApplicant(currentUser);
         Store.updateUser(currentUser);
+        project.addApplicant(currentUser);
     }
 
 
