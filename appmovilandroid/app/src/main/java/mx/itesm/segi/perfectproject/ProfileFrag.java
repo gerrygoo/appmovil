@@ -7,8 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.media.tv.TvContract;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -230,7 +228,7 @@ public class ProfileFrag extends Fragment {
         ivProfile.setImageBitmap(user.getProfPic());
         tvCompany.setText(user.getCompany());
         tvName.setText(user.getName());
-        rbRating.setRating(user.getRating());
+        rbRating.setRating((float) user.getRating());
         rateNum.setText(String.valueOf(user.getRating()));
         Mode.setChecked(getArguments().getBoolean(ARG_MODE));
         for(int i=0;i<user.getSkills().size(); i++){

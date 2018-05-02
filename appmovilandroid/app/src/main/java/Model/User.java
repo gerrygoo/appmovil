@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +38,7 @@ public class User implements Parcelable{
     private ImageListener imageListener;
     private Boolean finishLoadingImage;
 
-    private float Rating;
+    private double Rating;
     private boolean Premium;
 
     public User(String email, String name) {
@@ -48,7 +47,7 @@ public class User implements Parcelable{
 
         UID = "";
         Company = "";
-        Rating = 4;
+        Rating = 4.0;
         Premium = false;
         ProjectsMember = new ArrayList<>();
         ProjectsOwned = new ArrayList<>();
@@ -64,6 +63,7 @@ public class User implements Parcelable{
         Name = (String) map.get("name");
         Company = (String) map.get("company");
         Skills = (ArrayList<String>) map.get("skills");
+        Rating = (Double)map.get("rating");
         ProjectsMember = (ArrayList<String>) map.get("projectsMember");
         ProjectsOwned = (ArrayList<String>) map.get("projectsOwned");
         ReviewedProjects = (HashMap<String, Boolean>) map.get("reviewedProjects");
@@ -83,6 +83,7 @@ public class User implements Parcelable{
         result.put("name", Name);
         result.put("company", Company);
         result.put("skills", Skills);
+        result.put("rating",Rating);
         result.put("projectsMember", ProjectsMember);
         result.put("projectsOwned", ProjectsOwned);
         result.put("reviewedProjects", ReviewedProjects);
@@ -211,7 +212,7 @@ public class User implements Parcelable{
         return Company;
     }
 
-    public void setRating(float rating) {
+    public void setRating(double rating) {
         Rating = rating;
     }
 
@@ -235,7 +236,7 @@ public class User implements Parcelable{
         return ProjectsOwned;
     }
 
-    public float getRating() {
+    public double getRating() {
         return Rating;
     }
 
@@ -336,7 +337,7 @@ public class User implements Parcelable{
         }
         parcel.writeStringList(projects);
 
-        parcel.writeFloat(Rating);
+        parcel.writeDouble(Rating);
         parcel.writeByte((byte) (Premium ? 1 : 0));
     }
 
