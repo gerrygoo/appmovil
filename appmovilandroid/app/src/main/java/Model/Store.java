@@ -5,7 +5,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -61,6 +60,11 @@ public class Store implements IStore {
     }
 
     @Override
+    public ArrayList<User> getUsers(ArrayList<String> userUIDs) {
+        return null;
+    }
+
+    @Override
     public ArrayList<String> getAllProjectsUIDs() {
         ArrayList<String> result = new ArrayList<>(projects.size());
         for (Project project: projects){
@@ -107,16 +111,6 @@ public class Store implements IStore {
     }
 
     @Override
-    public boolean tryAuthenticate(String username, String password) {
-        try {
-            authenticate(username, password);
-            return true;
-        } catch (Errors.AuthException exception){
-            return false;
-        }
-    }
-
-    @Override
     public void updateProject(Project project) {
         Project current;
         for (int i = 0; i < projects.size(); i++) {
@@ -139,7 +133,7 @@ public class Store implements IStore {
     }
 
     @Override
-    public void register(User user, String password) throws Errors.RegisterException {
+    public boolean register(User user, String password) throws Errors.RegisterException {
         if(user.getName().isEmpty() || user.getEmail().isEmpty() || password.isEmpty()){
             throw new Errors.RegisterException("Item is missing", Errors.RegisterError.MissingItem);
         }
@@ -152,6 +146,7 @@ public class Store implements IStore {
         user.setUID(random.nextInt(1000000) + "");
         users.add(user);
         passwords.put(user, password);
+        return true;
     }
 
     private boolean verifyEmail(String email) {
@@ -168,18 +163,8 @@ public class Store implements IStore {
     }
 
     @Override
-    public boolean tryRegister(User user, String password) {
-        try{
-            register(user, password);
-            return true;
-        } catch (Errors.RegisterException exception){
-            return false;
-        }
-    }
-
-    @Override
     public void createProject(Project project) throws Errors.CreateProjectException {
-        if(project == null || project.getOwner() == null || project.getStartDate() == null || project.getEndDate() == null){
+        if(project == null || project.getOwnerUID() == null || project.getStartDate() == null || project.getEndDate() == null){
             throw new Errors.CreateProjectException("Missing data", Errors.CreateProjectError.MissingItems);
         }
         if(project.getUID().isEmpty() || project.getTitle().isEmpty() || project.getDescription().isEmpty() ||
@@ -197,13 +182,19 @@ public class Store implements IStore {
 
     private Project GoogleProject(int index){
         Calendar endDate = Calendar.getInstance();
-        endDate.add(Calendar.MONTH, 10);
+
+
+        ArrayList<String> positions = new ArrayList<>();
+        positions.add("Programmer");
+        positions.add("Product Manager");
+        positions.add("Experience Designer");
+
         return new Project(
                 random.nextInt(100000) + "",
                 null,
                 "Smart Cars" + index,
                 "https://pmcvariety.files.wordpress.com/2015/08/google-placeholder-logo.jpg?w=1000&h=563&crop=1",
-                new String[]{ "Programmer", "Product Manager", "Experience Designer" },
+                positions,
                 "The project focuses on building a self driving car, in which you are required to know Machine Learning and Artificial Intelligence Algorithms in order to be eligible for this project",
                 "Mountain View, California, United States",
                 Calendar.getInstance().getTime(),
@@ -216,13 +207,17 @@ public class Store implements IStore {
 
         Calendar startDate = Calendar.getInstance();
         endDate.add(Calendar.MONTH, 8);
+        ArrayList<String> positions = new ArrayList<>();
+        positions.add("Programmer");
+        positions.add("Program Manager");
+        positions.add("Tester");
 
         return new Project(
                 random.nextInt(100000) + "",
                 null,
                 "Cortana Search" + index,
                 "https://mspoweruser.com/wp-content/uploads/2016/09/Webgroesse_HighRes_Microsoft12711.jpg",
-                new String[]{ "Programmer", "Program Manager", "Tester" },
+                positions,
                 "This project focuses on implementing a Natural Language search for Cortana, for this we require that you have knowledge and background on Natural Language Processing or Artificial Intelligence",
                 "Redmond, Washington, United States",
                 startDate.getTime(),

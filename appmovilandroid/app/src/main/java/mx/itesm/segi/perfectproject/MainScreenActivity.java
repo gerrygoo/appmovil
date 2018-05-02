@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,6 +21,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 
@@ -178,8 +182,17 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     private void renderBrowse(){
         currentProject = 0;
-        this.projects = model.getAvailableProjects();
-        renderCards(currentProject, currentProject+1);
+        model.getAvailableProjects().addOnCompleteListener(new OnCompleteListener<ArrayList<Project>>() {
+            @Override
+            public void onComplete(@NonNull Task<ArrayList<Project>> task) {
+                if (task.isSuccessful()) {
+                    projects = task.getResult();
+                    renderCards(currentProject, currentProject + 1);
+                } else {
+                    task.getException().printStackTrace();
+                }
+            }
+        });
     }
 
     private void renderCards(int first, int second){
@@ -201,6 +214,9 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     private void renderCreateProject(){
         Fragment newProject = new CreateProject();
+        Bundle arguments = new Bundle();
+        arguments.putBoolean(CreateProject.ARG_EDITING, false);
+        newProject.setArguments(arguments);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, newProject).commit();
         activeFragments = new Fragment[]{newProject};
     }
@@ -234,6 +250,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         if(transitioning || currentProject >= projects.size()) {
             return;
         }
+
         Model.getInstance().reviewProject(projects.get(currentProject), true);
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         animateDragTo(+screenWidth, startingY).addListener(new Animator.AnimatorListener() {

@@ -1,15 +1,18 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +20,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.Tasks;
+
 import org.w3c.dom.Text;
 
 import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.StringJoiner;
+import java.util.concurrent.ExecutionException;
 
 import Model.Model;
 import Model.Project;
@@ -59,15 +65,38 @@ public class ProjectInfoFrag extends Fragment {
         return inflater.inflate(R.layout.fragment_project_info, container, false);
     }
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onStart() {
         super.onStart();
-        loadProject();
+
+        new AsyncTask<Void, Void, Pair<User, ArrayList<User>>>(){
+
+            @Override
+            protected Pair<User, ArrayList<User>> doInBackground(Void... voids) {
+                try {
+                    Project project = getArguments().getParcelable(ARG_PROJECT);
+                    User owner = Tasks.await(Model.getInstance().getUserByID(project.getOwnerUID()));
+                    ArrayList<User> team = Tasks.await(Model.getInstance().getTeam(project.getUID()));
+                    return new Pair<>(owner, team);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Pair<User, ArrayList<User>> pair) {
+                loadProject(pair.first, pair.second);
+            }
+        }.execute();
     }
 
-    private void loadProject() {
+    private void loadProject(final User owner, final ArrayList<User> team) {
+
         this.owned = getArguments().getBoolean(ARG_OWNED);
         this.project = getArguments().getParcelable(ARG_PROJECT);
+
         tvTitle = getActivity().findViewById(R.id.project_Title);
         tvStartDate = getActivity().findViewById(R.id.project_startDate);
         tvEndDate = getActivity().findViewById(R.id.project_endDate);
@@ -82,31 +111,32 @@ public class ProjectInfoFrag extends Fragment {
         tvTitle.setText(project.getTitle());
         tvStartDate.setText(android.text.format.DateFormat.format("dd/MM/yyyy", project.getStartDate()));
         tvEndDate.setText(android.text.format.DateFormat.format("dd/MM/yyyy", project.getEndDate()));
-        String positions[] = project.getPositions();
+
+        ArrayList<String> positions = project.getPositions();
+
         String positionsText = "";
-        for(int i = 0;i < positions.length;i++)
+        for(int i = 0;i < positions.size();i++)
         {
-            positionsText += positions[i];
-            if(i!=positions.length-1) positionsText += " ";
+            positionsText += positions.get(i);
+            if(i!=positions.size()-1) positionsText += " ";
         }
         tvPositions.setText(positionsText);
         tvLocation.setText(project.getLocation());
         tvDescription.setText(project.getDescription());
         ivLogo.setImageBitmap(project.getImage());
 
-        final ArrayList<User> team = project.getTeam();
         final TextView projectManager = new TextView(getContext());
         projectManager.setPadding(8, 8, 8, 8);
         projectManager.setTextSize(20);
         projectManager.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-        projectManager.setText("PM: " + project.getOwner().getName());
+        projectManager.setText("PM: " + owner);
         projectManager.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Fragment profile = new OtherProfileFrag();
                 Bundle argsProfile = new Bundle();
 
-                argsProfile.putParcelable(OtherProfileFrag.ARG_USER, project.getOwner());
+                argsProfile.putParcelable(OtherProfileFrag.ARG_USER, owner);
                 argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, true);
 
                 profile.setArguments(argsProfile);

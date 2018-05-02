@@ -1,12 +1,20 @@
 package Model;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+
+import mx.itesm.segi.perfectproject.ImageListener;
 
 /**
  * Created by ianne on 1/04/2018.
@@ -20,12 +28,17 @@ public class User implements Parcelable{
     private String Company;
     private Bitmap ProfPic;
     private ArrayList<String> Skills; //Probably own class
-    private ArrayList<Project> ProjectsMember;
-    private ArrayList<Project> ProjectsOwned;
+    private ArrayList<String> ProjectsMember;
+    private ArrayList<String> ProjectsOwned;
     private HashMap<String, Boolean> ReviewedProjects;
-    private HashMap<Project, Boolean> Notifications;
+    private HashMap<String, Boolean> Notifications;
+    private String ProfileImageURL;
+    private Bitmap ProfileImage;
 
-    private float Rating;
+    private ImageListener imageListener;
+    private Boolean finishLoadingImage;
+
+    private double Rating;
     private boolean Premium;
 
     public User(String email, String name) {
@@ -34,7 +47,7 @@ public class User implements Parcelable{
 
         UID = "";
         Company = "";
-        Rating = 4;
+        Rating = 4.0;
         Premium = false;
         ProjectsMember = new ArrayList<>();
         ProjectsOwned = new ArrayList<>();
@@ -43,16 +56,76 @@ public class User implements Parcelable{
         Skills = new ArrayList<>();
     }
 
+    protected User(Map<String, Object> map, String uid){
+        UID = uid;
+
+        Email = (String) map.get("email");
+        Name = (String) map.get("name");
+        Company = (String) map.get("company");
+        Skills = (ArrayList<String>) map.get("skills");
+
+        if(map.get("rating") instanceof Double) {
+            Rating = (Double) map.get("rating");
+        } else {
+            Rating = 4.0;
+        }
+        ProjectsMember = (ArrayList<String>) map.get("projectsMember");
+        ProjectsOwned = (ArrayList<String>) map.get("projectsOwned");
+        ReviewedProjects = (HashMap<String, Boolean>) map.get("reviewedProjects");
+        Notifications = (HashMap<String, Boolean>) map.get("notifications");
+        ProfileImageURL = (String) map.get("profileImageUrl");
+
+        if(!ProfileImageURL.isEmpty()) {
+            finishLoadingImage = false;
+            new DownloadImageFromURL().execute(ProfileImageURL);
+        }
+    }
+
+    public Map<String, Object> toMap(){
+        HashMap<String, Object> result = new HashMap<>();
+
+        result.put("email", Email);
+        result.put("name", Name);
+        result.put("company", Company);
+        result.put("skills", Skills);
+        result.put("rating",Rating);
+        result.put("projectsMember", ProjectsMember);
+        result.put("projectsOwned", ProjectsOwned);
+        result.put("reviewedProjects", ReviewedProjects);
+        result.put("notifications", Notifications);
+        result.put("profileImageUrl", ProfileImageURL);
+
+        return result;
+    }
+
     protected User(Parcel in) {
         UID = in.readString();
         Email = in.readString();
         Name = in.readString();
         Company = in.readString();
         Skills = in.createStringArrayList();
-        ProjectsMember = in.createTypedArrayList(Project.CREATOR);
-        ProjectsOwned = in.createTypedArrayList(Project.CREATOR);
+        ProjectsMember = in.createStringArrayList();
+        ProjectsOwned = in.createStringArrayList();
+
+        ArrayList<String> projects = in.createStringArrayList();
+        ReviewedProjects = new HashMap<>();
+        for (String uid: projects){
+            ReviewedProjects.put(uid, true);
+        }
+
+        ArrayList<String> notifications = in.createStringArrayList();
+        Notifications = new HashMap<>();
+        for (String uid: notifications){
+            Notifications.put(uid, true);
+        }
+
         Rating = in.readInt();
         Premium = in.readByte() != 0;
+
+        if(!ProfileImageURL.isEmpty()) {
+            finishLoadingImage = false;
+            new DownloadImageFromURL().execute(ProfileImageURL);
+        }
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -67,8 +140,25 @@ public class User implements Parcelable{
         }
     };
 
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void addProject(Project ...projects){
-        Collections.addAll(ProjectsMember, projects);
+        for (Project p : projects) {
+            ProjectsMember.add(p.getUID());
+        }
     }
 
     public void removeProjectMember(Project project)
@@ -77,11 +167,15 @@ public class User implements Parcelable{
     }
 
     public void addProjects(Project[] projects){
-        Collections.addAll(ProjectsMember, projects);
+        for (Project p : projects) {
+            ProjectsMember.add(p.getUID());
+        }
     }
 
     public void addProjectOwned(Project ...projects){
-        Collections.addAll(ProjectsOwned, projects);
+        for (Project p : projects) {
+            ProjectsOwned.add(p.getUID());
+        }
     }
 
     public void removeProjectOwned(Project project)
@@ -90,7 +184,9 @@ public class User implements Parcelable{
     }
 
     public void addProjectsOwned(Project[] projects){
-        Collections.addAll(ProjectsOwned, projects);
+        for (Project p : projects) {
+            ProjectsOwned.add(p.getUID());
+        }
     }
 
     public void setSkill(int key,String skill){
@@ -121,7 +217,7 @@ public class User implements Parcelable{
         return Company;
     }
 
-    public void setRating(float rating) {
+    public void setRating(double rating) {
         Rating = rating;
     }
 
@@ -137,15 +233,15 @@ public class User implements Parcelable{
         return Skills;
     }
 
-    public ArrayList<Project> getProjectsMember() {
+    public ArrayList<String> getProjectsMember() {
         return ProjectsMember;
     }
 
-    public ArrayList<Project> getProjectsOwned() {
+    public ArrayList<String> getProjectsOwned() {
         return ProjectsOwned;
     }
 
-    public float getRating() {
+    public double getRating() {
         return Rating;
     }
 
@@ -153,16 +249,32 @@ public class User implements Parcelable{
         return Premium;
     }
 
-    public HashMap<Project, Boolean> getNotifications() {
+    public HashMap<String, Boolean> getNotifications() {
         return Notifications;
     }
 
-    void setNotifications(HashMap<Project, Boolean> notifications) {
+    void setNotifications(HashMap<String, Boolean> notifications) {
         Notifications = notifications;
     }
 
+    public void setProfileImageURL(String url){
+        this.ProfileImageURL = url;
+    }
+
+    public String getProfileImageURL(){
+        return ProfileImageURL;
+    }
+
+    public Bitmap getProfileImage() {
+        return ProfileImage;
+    }
+
+    public void setProfileImage(Bitmap profileImage) {
+        ProfileImage = profileImage;
+    }
+
     void viewNotification(Project project){
-        Notifications.put(project, true);
+        Notifications.put(project.getUID(), true);
     }
 
     public boolean hasReviewedProject(String projectUID) {
@@ -215,8 +327,50 @@ public class User implements Parcelable{
         parcel.writeString(Name);
         parcel.writeString(Company);
         parcel.writeStringList(Skills);
-        parcel.writeTypedList(ProjectsMember);
-        parcel.writeFloat(Rating);
+        parcel.writeStringList(ProjectsMember);
+        parcel.writeStringList(ProjectsOwned);
+
+        ArrayList<String> projects = new ArrayList<>();
+        for(String key: ReviewedProjects.keySet()){
+            if(ReviewedProjects.get(key)){
+                projects.add(key);
+            }
+        }
+        parcel.writeStringList(projects);
+
+        ArrayList<String> notifications = new ArrayList<>();
+        for(String key: Notifications.keySet()){
+            if(Notifications.get(key)){
+                notifications.add(key);
+            }
+        }
+        parcel.writeStringList(notifications);
+
+        parcel.writeDouble(Rating);
         parcel.writeByte((byte) (Premium ? 1 : 0));
+    }
+
+    public void setImageListener(ImageListener imageListener) {
+        this.imageListener = imageListener;
+        if(finishLoadingImage){
+            imageListener.onImageAvailable(ProfileImage);
+        }
+    }
+
+    private class DownloadImageFromURL extends AsyncTask<String, Void, Bitmap> {
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            return getBitmapFromURL(strings[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            ProfileImage = bitmap;
+            finishLoadingImage = true;
+            if(imageListener != null){
+                imageListener.onImageAvailable(bitmap);
+            }
+        }
     }
 }

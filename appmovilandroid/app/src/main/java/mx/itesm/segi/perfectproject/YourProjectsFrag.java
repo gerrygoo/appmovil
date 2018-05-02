@@ -1,19 +1,30 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 import Model.Model;
 import Model.User;
@@ -69,12 +80,13 @@ public class YourProjectsFrag extends Fragment {
             @Override
             public void itemClicked(long id) {
                 shouldRemoveBackStack = true;
+
                 renderProject((int)id);
             }
 
             @Override
             public void clearNew(int position) {
-                Model.getInstance().viewNotificaction(projects.get(position));
+                Model.getInstance().viewNotification(projects.get(position));
             }
 
             @Override
@@ -97,19 +109,44 @@ public class YourProjectsFrag extends Fragment {
         };
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void loadProjects() {
         this.user = getArguments().getParcelable(ARG_USER);
         this.owned = getArguments().getBoolean(ARG_OWNED);
-        AdapterRV adapterRV;
+        final AdapterRV adapterRV = new AdapterRV(new ArrayList<Project>(), owned, listener);
 
-        if(owned){
-            this.projects = user.getProjectsOwned();
-            adapterRV = new AdapterRV(user.getProjectsOwned(), true, listener);
-        } else {
-            this.projects = user.getProjectsMember();
-            adapterRV = new AdapterRV(user.getProjectsMember(), false, listener);
-            adapterRV.setNotifications(user.getNotifications());
-        }
+        new AsyncTask<Void, Void, ArrayList<Project>>(){
+            @Override
+            protected ArrayList<Project> doInBackground(Void... voids) {
+                try {
+                    if(owned) {
+                        ArrayList<Project> projects = Tasks.await(Model.getInstance().getOwnedProjects());
+                        Log.e("Lengths", "" + Model.getInstance().getCurrentUser().getProjectsOwned() + "" + projects.size() +"");
+                        return projects;
+                    } else {
+                        ArrayList<Project> projects = Tasks.await(Model.getInstance().getMyProjects());
+                        return projects;
+                    }
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<Project> param) {
+                if(owned){
+                    adapterRV.setProjects(param);
+                    adapterRV.notifyDataSetChanged();
+                } else {
+                    adapterRV.setProjects(param);
+                    adapterRV.setNotifications(user.getNotifications());
+                    adapterRV.notifyDataSetChanged();
+                }
+                projects = param;
+                Log.e("Fetched", "true" + param.size());
+            }
+        }.execute();
         rvYourProjects.setAdapter(adapterRV);
     }
 

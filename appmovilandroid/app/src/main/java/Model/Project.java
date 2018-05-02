@@ -12,6 +12,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import mx.itesm.segi.perfectproject.ImageListener;
 
@@ -22,19 +24,19 @@ import mx.itesm.segi.perfectproject.ImageListener;
 public class Project implements Parcelable{
 
     private String UID;
-    private User Owner;
+    private String OwnerUID;
     private String Title;
     private Bitmap Image;
     private String ImageUrl;
-    private String[] Positions;
+    private ArrayList<String> Positions;
     private String Description;
     private String Location;
     private Date StartDate;
     private Date EndDate;
     private double Compensation;
 
-    private ArrayList<User> Applicants;
-    private ArrayList<User> Team;
+    private ArrayList<String> Applicants;
+    private ArrayList<String> Team;
 
     private ImageListener imageListener;
 
@@ -42,9 +44,9 @@ public class Project implements Parcelable{
 
     //private ImageReader.OnImageAvailableListener
 
-    public Project(String uid, User owner, String title, String imageUrl, String[] positions, String description,String location, Date startDate, Date endDate) {
+    public Project(String uid, User owner, String title, String imageUrl, ArrayList<String> positions, String description, String location, Date startDate, Date endDate) {
         UID = uid;
-        Owner = owner;
+        OwnerUID = owner.getUID();
         Title = title;
         ImageUrl = imageUrl;
         Positions = positions;
@@ -60,9 +62,9 @@ public class Project implements Parcelable{
         new Project.DownloadImageFromURL().execute(imageUrl);
     }
 
-    public Project(String uid, User owner, String title, Bitmap image, String[] positions, String description,String location, Date startDate, Date endDate) {
+    public Project(String uid, User owner, String title, Bitmap image, ArrayList<String> positions, String description, String location, Date startDate, Date endDate) {
         UID = uid;
-        Owner = owner;
+        OwnerUID = owner.getUID();
         Title = title;
         Image = image;
         Positions = positions;
@@ -75,13 +77,30 @@ public class Project implements Parcelable{
         Applicants = new ArrayList<>();
 
         finishLoadingImage = true;
-        //new Project.DownloadImageFromIS().execute(inputStream);
+    }
+
+    Project(Map<String, Object> map, String uid){
+        UID = uid;
+        OwnerUID = (String) map.get("owner");
+        Title = (String) map.get("title");
+        ImageUrl = (String) map.get("imageURL");
+        Positions = (ArrayList<String>) map.get("positions");
+        Location = (String)(map.get("location"));
+        Description = (String) map.get("description");
+        StartDate = (Date) map.get("startDate");
+        EndDate = (Date) map.get("endDate");
+        Applicants = (ArrayList<String>) map.get("applicants");
+        Team = (ArrayList<String>) map.get("team");
+        Compensation = (double) map.get("compensation");
+
+        finishLoadingImage = false;
+        new Project.DownloadImageFromURL().execute(ImageUrl);
     }
 
     protected Project(Parcel in) {
         Title = in.readString();
         ImageUrl = in.readString();
-        Positions = in.createStringArray();
+        Positions = in.createStringArrayList();
         Description = in.readString();
         Location = in.readString();
         StartDate = new Date(in.readLong());
@@ -132,7 +151,7 @@ public class Project implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(Title);
         parcel.writeString(ImageUrl);
-        parcel.writeArray(Positions);
+        parcel.writeStringList(Positions);
         parcel.writeString(Description);
         parcel.writeString(Location);
         parcel.writeLong(StartDate.getTime());
@@ -147,11 +166,7 @@ public class Project implements Parcelable{
         Image = image;
     }
 
-    public void setImageUrl(String imageUrl) {
-        ImageUrl = imageUrl;
-    }
-
-    public void setPositions(String[] positions) {
+    public void setPositions(ArrayList<String> positions) {
         Positions = positions;
     }
 
@@ -169,10 +184,6 @@ public class Project implements Parcelable{
 
     public void setEndDate(Date endDate) {
         EndDate = endDate;
-    }
-
-    public void setCompensation(double compensation) {
-        Compensation = compensation;
     }
 
     public void setFinishLoadingImage(Boolean finishLoadingImage) {
@@ -235,7 +246,7 @@ public class Project implements Parcelable{
         return Image;
     }
 
-    public String[] getPositions() {
+    public ArrayList<String> getPositions() {
         return Positions;
     }
 
@@ -259,40 +270,61 @@ public class Project implements Parcelable{
         return Compensation;
     }
 
-    public ArrayList<User> getApplicants() {
+    public void setCompensation(double compensation) {
+        Compensation = compensation;
+    }
+
+    public ArrayList<String> getApplicants() {
         return Applicants;
     }
 
     protected void setApplicants(ArrayList<User> applicants) {
-        Applicants = applicants;
+        Applicants.clear();
+        for (User user: applicants) {
+            Applicants.add(user.getUID());
+        }
+    }
+
+    public String getImageUrl() {
+        return ImageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        ImageUrl = imageUrl;
+        finishLoadingImage = false;
+        new Project.DownloadImageFromURL().execute(ImageUrl);
     }
 
     public void addApplicant(User applicant){
-        Applicants.add(applicant);
+        Applicants.add(applicant.getUID());
     }
 
     public void removeApplicant(User applicant) {
-        Applicants.remove(applicant);
+        Applicants.remove(applicant.getUID());
     }
 
-    public ArrayList<User> getTeam() {
+    public ArrayList<String> getTeam() {
         return Team;
     }
 
+
     protected void setTeam(ArrayList<User> team) {
-        Team = team;
+        Team.clear();
+        for (User user: team) {
+            Team.add(user.getUID());
+        }
     }
 
     public void addTeamMember(User user){
-        this.Team.add(user);
+        this.Team.add(user.getUID());
     }
 
     public void removeTeamMember(User user){
-        this.Team.remove(user);
+        this.Team.remove(user.getUID());
     }
 
-    public User getOwner() {
-        return Owner;
+    public String getOwnerUID() {
+        return OwnerUID;
     }
 
     @Override
@@ -306,7 +338,31 @@ public class Project implements Parcelable{
     }
 
     @Override
+    public String toString() {
+        return Title;
+    }
+
+    @Override
     public int hashCode() {
         return UID.hashCode();
+    }
+
+    Map<String, Object> toMap(){
+
+        HashMap<String, Object> projectMap = new HashMap<>();
+
+        projectMap.put("owner", OwnerUID);
+        projectMap.put("title", Title);
+        projectMap.put("imageURL", ImageUrl);
+        projectMap.put("positions", Positions);
+        projectMap.put("description", Description);
+        projectMap.put("location", Location);
+        projectMap.put("startDate", StartDate);
+        projectMap.put("endDate", EndDate);
+        projectMap.put("applicants", Applicants);
+        projectMap.put("team", Team);
+        projectMap.put("compensation", Compensation);
+
+        return projectMap;
     }
 }

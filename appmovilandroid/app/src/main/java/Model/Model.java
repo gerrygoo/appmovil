@@ -1,6 +1,16 @@
 package Model;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.android.gms.tasks.Tasks;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by ianne on 2/04/2018.
@@ -8,67 +18,102 @@ import java.util.ArrayList;
 
 public class Model implements IModel {
 
-    private IStore Store;
+    private final IAsyncStore Store;
     private static Model instance;
     private User currentUser;
 
-    private Model(IStore store){
+    private Model(IAsyncStore store){
         Store = store;
     }
 
     public static Model getInstance() {
         if(instance == null){
-            instance = new Model(new Store());
+            instance = new Model(new FirebaseStore());
         }
         return instance;
     }
 
     @Override
-    public ArrayList<Project> getAvailableProjects() {
-        ArrayList<String> uids = Store.getAllProjectsUIDs();
-        ArrayList<String> pendingProjectsUIDs = new ArrayList<>(uids.size());
-
-        for (String uid: uids) {
-            if(!currentUser.hasReviewedProject(uid)){
-                pendingProjectsUIDs.add(uid);
+    public Task<ArrayList<Project>> getAvailableProjects() {
+        return Store.getAllProjectsUIDs().continueWithTask(new Continuation<ArrayList<String>, Task<ArrayList<Project>>>() {
+            @Override
+            public Task<ArrayList<Project>> then(@NonNull Task<ArrayList<String>> task) throws Exception {
+                if (task.isSuccessful()) {
+                    ArrayList<String> uids = task.getResult();
+                    ArrayList<String> pendingProjects = new ArrayList<>(uids.size());
+                    for (String uid : uids) {
+                        if (!currentUser.hasReviewedProject(uid)) {
+                            pendingProjects.add(uid);
+                        }
+                    }
+                    return Store.getProjects(pendingProjects);
+                } else {
+                    throw task.getException();
+                }
             }
-        }
-
-        return  Store.getProjects(pendingProjectsUIDs);
+        });
     }
 
     @Override
-    public ArrayList<Project> getMyProjects() {
-        return currentUser.getProjectsMember();
+    public Task<ArrayList<Project>> getMyProjects() {
+        return Store.getProjects(currentUser.getProjectsMember());
     }
 
     @Override
-    public void viewNotificaction(Project project) {
+    public void viewNotification(Project project) {
         currentUser.viewNotification(project);
+        Log.e("Notification", "viewed");
         Store.updateUser(currentUser);
     }
 
     @Override
-    public ArrayList<User> getApplicants(String projectUID) {
-        return Store.getProject(projectUID).getApplicants();
+    public Task<ArrayList<User>> getApplicants(final String projectUID) {
+        return Store.getProject(projectUID).continueWithTask(new Continuation<Project, Task<ArrayList<User>>>() {
+            @Override
+            public Task<ArrayList<User>> then(@NonNull Task<Project> task) throws Exception {
+                if(task.isSuccessful()){
+                    ArrayList<String> ids = task.getResult().getApplicants();
+                    return Store.getUsers(ids);
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public ArrayList<User> getTeam(String projectUID) {
-        return Store.getProject(projectUID).getTeam();
+    public Task<ArrayList<User>> getTeam(final String projectUID) {
+        return Store.getProject(projectUID).continueWithTask(new Continuation<Project, Task<ArrayList<User>>>() {
+            @Override
+            public Task<ArrayList<User>> then(@NonNull Task<Project> task) throws Exception {
+                if(task.isSuccessful()){
+                    ArrayList<String> ids = task.getResult().getTeam();
+                    return Store.getUsers(ids);
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public boolean authenticate(String username, String password) throws Errors.AuthException {
+    public Task<Boolean> authenticate(final String username, final String password) throws Errors.AuthException {
+
         if(username.isEmpty() || password.isEmpty()){
             throw new Errors.AuthException("Username or password is Missing", Errors.AuthError.MissingItems);
         }
-        try {
-            this.currentUser = Store.authenticate(username, password);
-            return true;
-        } catch (Errors.AuthException exception){
-            throw exception;
-        }
+        return Store.authenticate(username, password).continueWith(new Continuation<User, Boolean>() {
+            @Override
+            public Boolean then(@NonNull Task<User> task) throws Exception {
+                if(task.isSuccessful()){
+                    currentUser = task.getResult();
+                    return true;
+                } else {
+                    task.getException().printStackTrace();
+                    return false;
+                }
+            }
+        });
     }
 
     @Override
@@ -81,6 +126,16 @@ public class Model implements IModel {
         return currentUser;
     }
 
+    @Override
+    public Task<Void> updateCurrentUser() {
+        return Store.updateUser(currentUser);
+    }
+
+    @Override
+    public Task<User> getUserByID(String uid) {
+        return Store.getUser(uid);
+    }
+
     // TODO
     @Override
     public void register(User user, String password) throws Errors.RegisterException {
@@ -89,6 +144,33 @@ public class Model implements IModel {
         }
         Store.register(user,password);
     }
+
+    @Override
+    public Task<ArrayList<Project>> getOwnedProjects() {
+        return Store.getProjects(currentUser.getProjectsOwned());
+    }
+//
+//    @Override
+//    public Task<HashMap<Project, Boolean>> getNotifications() {
+//        ArrayList<String> notificationsIds = new ArrayList<>(currentUser.getNotifications().keySet());
+//
+//        return Store.getProjects(notificationsIds).continueWith(new Continuation<ArrayList<Project>, HashMap<Project, Boolean>>() {
+//            @Override
+//            public HashMap<Project, Boolean> then(@NonNull Task<ArrayList<Project>> task) throws Exception {
+//                if(task.isSuccessful()){
+//                    HashMap<Project, Boolean> notifications = new HashMap<>();
+//
+//                    ArrayList<Project> projects = task.getResult();
+//                    for (Project p: projects) {
+//                        notifications.put(p, currentUser.getNotifications().get(p.getUID()));
+//                    }
+//                    return notifications;
+//                } else {
+//                    throw task.getException();
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void reviewApplicant(Project project, User applicant, boolean accept) {
@@ -102,42 +184,76 @@ public class Model implements IModel {
     }
 
     @Override
-    public void createProject(Project project) throws Errors.CreateProjectException {
-        Store.createProject(project);
-        currentUser.addProjectOwned(project);
-        Store.updateUser(currentUser);
+    public Task<Void> createProject(final Project project) throws Errors.CreateProjectException {
+        return Store.createProject(project).continueWith(new Continuation<Void, Void>() {
+            @Override
+            public Void then(@NonNull Task<Void> task) throws Exception {
+                currentUser.addProjectOwned(project);
+                return null;
+            }
+        }).continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+                Store.updateUser(currentUser);
+                TaskCompletionSource taskCompletionSource = new TaskCompletionSource();
+                taskCompletionSource.setResult(null);
+                return taskCompletionSource.getTask();
+            }
+        });
     }
 
     @Override
-    public void reviewProject(Project project, boolean accept) {
+    public Task<Void> updateProject(Project project) {
+        return Store.updateProject(project);
+    }
+
+    @Override
+    public void reviewProject(final Project project, final boolean accept) {
         currentUser.reviewProject(project, accept);
-        if(accept)project.addApplicant(currentUser);
-        Store.updateUser(currentUser);
-    }
-
-
-    public void updateProject(Project p, Project project) {
-        p.setTitle(project.getTitle());
-        p.setCompensation(project.getCompensation());
-        p.setDescription(project.getDescription());
-        p.setEndDate(project.getEndDate());
-        p.setStartDate(project.getStartDate());
-        p.setImage(project.getImage());
-        p.setLocation(project.getLocation());
-        p.setPositions(project.getPositions());
-        Store.updateProject(p);
-    }
-
-    public void deleteProject(Project project)
-    {
-        ArrayList<User> members = project.getTeam();
-        for(int i = 0;i < members.size();i++)
-        {
-            members.get(i).removeProjectMember(project);
-            Store.updateUser(members.get(i));
+        if(accept) {
+            project.addApplicant(currentUser);
         }
-        currentUser.removeProjectOwned(project);
-        Store.updateUser(currentUser);
-        Store.deleteProject(project);
+        Store.updateUser(currentUser).continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+                if(task.isSuccessful()) {
+                    if (accept) {
+                        Log.e("Review Project", "starting");
+                        return Store.updateProject(project);
+                    }
+                }
+                return null;
+            }
+        }).continueWith(new Continuation<Void, Void>() {
+            @Override
+            public Void then(@NonNull Task<Void> task) throws Exception {
+                Log.e("Review Project", "ended");
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public void deleteProject(final Project project)
+    {
+        ArrayList<String> membersIds = project.getTeam();
+        Store.getUsers(membersIds).continueWith(new Continuation<ArrayList<User>, Void>() {
+
+            @Override
+            public Void then(@NonNull Task<ArrayList<User>> task) throws Exception {
+                ArrayList<User> members = task.getResult();
+                for(int i = 0;i < members.size();i++)
+                {
+                    members.get(i).removeProjectMember(project);
+                    Tasks.await(Store.updateUser(members.get(i)));
+                }
+                Tasks.await(Store.deleteProject(project));
+                return null;
+            }
+        });
+    }
+
+    public Task<Void> resetPassword(String email){
+        return Store.resetPassword(email);
     }
 }

@@ -1,5 +1,6 @@
 package mx.itesm.segi.perfectproject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.icu.util.Calendar;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -25,11 +27,17 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.google.android.gms.tasks.Tasks;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import Model.Errors;
 import Model.Model;
@@ -179,6 +187,7 @@ public class CreateProject extends Fragment {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void editProject()
     {
         Title.setText(project.getTitle());
@@ -188,12 +197,12 @@ public class CreateProject extends Fragment {
         ImageUrl=" ";
         StartDate.setText(android.text.format.DateFormat.format("dd/MM/yyyy", project.getStartDate()));
         EndDate.setText(android.text.format.DateFormat.format("dd/MM/yyyy", project.getEndDate()));
-        String positions[] = project.getPositions();
+        ArrayList<String> positions = project.getPositions();
         String positionsText = "";
-        for(int i = 0;i < positions.length;i++)
+        for(int i = 0; i < positions.size(); i++)
         {
-            positionsText += positions[i];
-            if(i!=positions.length-1) positionsText += " ";
+            positionsText += positions.get(i);
+            if(i!=positions.size()-1) positionsText += " ";
         }
         Positions.setText(positionsText);
         Location.setText(project.getLocation());
@@ -213,6 +222,7 @@ public class CreateProject extends Fragment {
         });
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void save(View v) throws ParseException {
         if (Title.length() == 0) {
             Snackbar.make(v, "Insert title", Snackbar.LENGTH_LONG).show();
@@ -229,33 +239,49 @@ public class CreateProject extends Fragment {
         } else if (Description.length() == 0) {
             Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
         } else {
-            String[] PositionsArr = Positions.getText().toString().split(" ");
+            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
-            Project project = new Project(
-                    "1234",
+            project = new Project(
+                    project.getUID(),
                     Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),
                     BMimage,
-                    PositionsArr,
+                    positions,
                     Description.getText().toString(),
                     Location.getText().toString(),
                     Start,
                     End
             );
             Log.i("Exito", project.toString());
-            Model.getInstance().updateProject(this.project, project);
 
-            Fragment fragment = new ProjectInfoFrag();
-            Bundle args = new Bundle();
-            args.putParcelable(ProjectInfoFrag.ARG_PROJECT, project);
-            args.putBoolean(ProjectInfoFrag.ARG_OWNED, true);
-            fragment.setArguments(args);
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, fragment).addToBackStack(MainScreenActivity.BACK_STACK);
-            transaction.commit();
+            new AsyncTask<Void, Void, Void>(){
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    try {
+                        Tasks.await(Model.getInstance().updateProject(project));
+
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    Fragment fragment = new ProjectInfoFrag();
+                    Bundle args = new Bundle();
+                    args.putParcelable(ProjectInfoFrag.ARG_PROJECT, project);
+                    args.putBoolean(ProjectInfoFrag.ARG_OWNED, true);
+                    fragment.setArguments(args);
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, fragment).addToBackStack(MainScreenActivity.BACK_STACK);
+                    transaction.commit();
+                }
+            }.execute();
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void create(View v) throws ParseException {
         if (Title.length() == 0) {
             Snackbar.make(v, "Insert title", Snackbar.LENGTH_LONG).show();
@@ -272,34 +298,46 @@ public class CreateProject extends Fragment {
         } else if (Description.length() == 0) {
             Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
         } else {
-            String[] PositionsArr = Positions.getText().toString().split(" ");
+            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
-            Project project = new Project(
-                    "1234",
+            project = new Project(
+                    null,
                     Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),
                     BMimage,
-                    PositionsArr,
+                    positions,
                     Description.getText().toString(),
                     Location.getText().toString(),
                     Start,
                     End
             );
             Log.i("Exito", project.toString());
-            try {
-                Model.getInstance().createProject(project);
-                Title.setText("");
-                Logo.setBackground(getResources().getDrawable(android.R.drawable.btn_default));
-                ImageUrl="";
-                StartDate.setText("");
-                EndDate.setText("");
-                Positions.setText("");
-                Location.setText("");
-                Description.setText("");
-            } catch (Errors.CreateProjectException exception) {
-                Snackbar.make(v, exception.getMessage(), Snackbar.LENGTH_LONG).show();
-            }
+            new AsyncTask<Void, Void, Void>(){
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    try {
+                        Tasks.await(Model.getInstance().createProject(project));
+
+                    } catch (ExecutionException | InterruptedException | Errors.CreateProjectException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    Title.setText("");
+                    Logo.setBackground(getResources().getDrawable(android.R.drawable.btn_default));
+                    ImageUrl="";
+                    StartDate.setText("");
+                    EndDate.setText("");
+                    Positions.setText("");
+                    Location.setText("");
+                    Description.setText("");
+                }
+            }.execute();
         }
     }
 

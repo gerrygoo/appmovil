@@ -1,11 +1,13 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -23,9 +25,13 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.Switch;
 
+import com.google.android.gms.tasks.Tasks;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
 
+import Model.Model;
 import Model.User;
 
 
@@ -222,7 +228,7 @@ public class ProfileFrag extends Fragment {
         ivProfile.setImageBitmap(user.getProfPic());
         tvCompany.setText(user.getCompany());
         tvName.setText(user.getName());
-        rbRating.setRating(user.getRating());
+        rbRating.setRating((float) user.getRating());
         rateNum.setText(String.valueOf(user.getRating()));
         Mode.setChecked(getArguments().getBoolean(ARG_MODE));
         for(int i=0;i<user.getSkills().size(); i++){
@@ -231,6 +237,7 @@ public class ProfileFrag extends Fragment {
     }
 
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onStop() {
         super.onStop();
@@ -244,6 +251,18 @@ public class ProfileFrag extends Fragment {
                 user.addSkill(s.getText().toString());
             }
         }
+        new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    Tasks.await(Model.getInstance().updateCurrentUser());
+
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute();
     }
 
     public interface OnSwitchToggleListener {

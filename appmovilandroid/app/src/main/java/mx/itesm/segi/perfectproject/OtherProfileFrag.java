@@ -1,17 +1,14 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
 
 import java.util.ArrayList;
@@ -65,11 +62,16 @@ public class OtherProfileFrag extends Fragment {
         tvEmail = getActivity().findViewById(R.id.tvEmail);
         tvSkills = getActivity().findViewById(R.id.tvSkills);
 
-        ivProfile.setImageBitmap(user.getProfPic());
+        user.setImageListener(new ImageListener() {
+            @Override
+            public void onImageAvailable(Bitmap image) {
+                ivProfile.setImageBitmap(image);
+            }
+        });
         tvName.setText(user.getName());
         tvCompany.setText(user.getCompany());
         rateNum.setText(user.getRating() + "");
-        rbRating.setRating(user.getRating());
+        rbRating.setRating((float) user.getRating());
 
         if(getArguments().getBoolean(ARG_JOINED)) tvEmail.setText(user.getEmail());
         else tvEmail.setText(R.string.email_not_available);
