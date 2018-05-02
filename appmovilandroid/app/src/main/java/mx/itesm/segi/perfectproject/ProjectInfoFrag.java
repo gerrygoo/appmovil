@@ -3,10 +3,12 @@ package mx.itesm.segi.perfectproject;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,6 +95,26 @@ public class ProjectInfoFrag extends Fragment {
         ivLogo.setImageBitmap(project.getImage());
 
         final ArrayList<User> team = project.getTeam();
+        final TextView projectManager = new TextView(getContext());
+        projectManager.setPadding(8, 8, 8, 8);
+        projectManager.setTextSize(20);
+        projectManager.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+        projectManager.setText("PM: " + project.getOwner().getName());
+        projectManager.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment profile = new OtherProfileFrag();
+                Bundle argsProfile = new Bundle();
+
+                argsProfile.putParcelable(OtherProfileFrag.ARG_USER, project.getOwner());
+                argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, true);
+
+                profile.setArguments(argsProfile);
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).addToBackStack(MainScreenActivity.BACK_STACK);
+                transaction.commit();
+            }
+        });
+        llContainer.addView(projectManager);
         for(int i = 0;i < team.size();i++)
         {
             TextView user = new TextView(getContext());
@@ -103,8 +125,15 @@ public class ProjectInfoFrag extends Fragment {
             user.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    /** ADD TO THE LISTENER INTERFACE THE METHOD THAT LOOKS FOR A PROFILE AND SEND THE USER IDENTIFIER TO THAT METHOD **/
-                    Log.d("AdapterRV", "Look for profile " + team.get(index).toString());
+                    Fragment profile = new OtherProfileFrag();
+                    Bundle argsProfile = new Bundle();
+
+                    argsProfile.putParcelable(OtherProfileFrag.ARG_USER, team.get(index));
+                    argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, true);
+
+                    profile.setArguments(argsProfile);
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).addToBackStack(MainScreenActivity.BACK_STACK);
+                    transaction.commit();
                 }
             });
             llContainer.addView(user);

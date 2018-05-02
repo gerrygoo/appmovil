@@ -81,8 +81,7 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                 applicantCard.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        /** ADD TO THE LISTENER INTERFACE THE METHOD THAT LOOKS FOR A PROFILE AND SEND THE USER IDENTIFIER TO THAT METHOD **/
-                        Log.d("AdapterRV", "Look for profile " + applicants.get(index).toString());
+                        listener.loadProfile(applicants.get(index));
                     }
                 });
 
