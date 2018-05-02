@@ -36,7 +36,7 @@ import Model.User;
 public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
 
     private ArrayList<Project> projects;
-    private HashMap<Project, Boolean> notifications;
+    private HashMap<String, Boolean> notifications;
     private boolean owned;
 
     private YourProjectsFrag.Listener listener;
@@ -144,8 +144,6 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                     }
                 }
             }.execute();
-
-
         }
         currentProject.setImageListener(new ImageListener() {
             @Override
@@ -155,13 +153,16 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
         });
         tvEndDate.setText(dateFormatter.format(currentProject.getEndDate()));
 
-        if (owned || notifications == null || (notifications.containsKey(currentProject) && !notifications.get(currentProject))) {
+        if(notifications != null) {
+            Log.e("NotificationViewd", notifications.toString());
+        }
+        if (owned || notifications == null || (notifications.containsKey(currentProject.getUID()) && notifications.get(currentProject.getUID()))) {
             ImageView isNew = card.findViewById(R.id.ivNew);
             isNew.setVisibility(View.INVISIBLE);
         }
     }
 
-    public void setNotifications(HashMap<Project, Boolean> notifications) {
+    public void setNotifications(HashMap<String, Boolean> notifications) {
         this.notifications = notifications;
     }
 

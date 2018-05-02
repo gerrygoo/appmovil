@@ -34,5 +34,5 @@ public interface IModel {
     void register(User user, String password) throws  Errors.RegisterException;
 
     Task<ArrayList<Project>> getOwnedProjects();
-    Task<HashMap<Project, Boolean>> getNotifications();
+    //Task<HashMap<Project, Boolean>> getNotifications();
 }

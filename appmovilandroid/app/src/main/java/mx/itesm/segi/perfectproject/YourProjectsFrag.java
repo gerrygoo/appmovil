@@ -80,6 +80,7 @@ public class YourProjectsFrag extends Fragment {
             @Override
             public void itemClicked(long id) {
                 shouldRemoveBackStack = true;
+
                 renderProject((int)id);
             }
 
@@ -114,18 +115,17 @@ public class YourProjectsFrag extends Fragment {
         this.owned = getArguments().getBoolean(ARG_OWNED);
         final AdapterRV adapterRV = new AdapterRV(new ArrayList<Project>(), owned, listener);
 
-        new AsyncTask<Void, Void, Pair<ArrayList<Project>, HashMap<Project, Boolean>>>(){
+        new AsyncTask<Void, Void, ArrayList<Project>>(){
             @Override
-            protected Pair<ArrayList<Project>, HashMap<Project, Boolean>> doInBackground(Void... voids) {
+            protected ArrayList<Project> doInBackground(Void... voids) {
                 try {
                     if(owned) {
                         ArrayList<Project> projects = Tasks.await(Model.getInstance().getOwnedProjects());
                         Log.e("Lengths", "" + Model.getInstance().getCurrentUser().getProjectsOwned() + "" + projects.size() +"");
-                        return new Pair<>(projects, null);
+                        return projects;
                     } else {
                         ArrayList<Project> projects = Tasks.await(Model.getInstance().getMyProjects());
-                        HashMap<Project, Boolean> notifications = Tasks.await(Model.getInstance().getNotifications());
-                        return new Pair<>(projects, notifications);
+                        return projects;
                     }
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
@@ -134,17 +134,17 @@ public class YourProjectsFrag extends Fragment {
             }
 
             @Override
-            protected void onPostExecute(Pair<ArrayList<Project>, HashMap<Project, Boolean>> pair) {
+            protected void onPostExecute(ArrayList<Project> param) {
                 if(owned){
-                    adapterRV.setProjects(pair.first);
+                    adapterRV.setProjects(param);
                     adapterRV.notifyDataSetChanged();
                 } else {
-                    adapterRV.setProjects(pair.first);
-                    adapterRV.setNotifications(pair.second);
+                    adapterRV.setProjects(param);
+                    adapterRV.setNotifications(user.getNotifications());
                     adapterRV.notifyDataSetChanged();
                 }
-                projects = pair.first;
-                Log.e("Fetched", "true" + pair.first.size());
+                projects = param;
+                Log.e("Fetched", "true" + param.size());
             }
         }.execute();
         rvYourProjects.setAdapter(adapterRV);

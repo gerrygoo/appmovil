@@ -62,6 +62,7 @@ public class Model implements IModel {
     @Override
     public void viewNotification(Project project) {
         currentUser.viewNotification(project);
+        Log.e("Notification", "viewed");
         Store.updateUser(currentUser);
     }
 
@@ -148,31 +149,28 @@ public class Model implements IModel {
     public Task<ArrayList<Project>> getOwnedProjects() {
         return Store.getProjects(currentUser.getProjectsOwned());
     }
-
-    @Override
-    public Task<HashMap<Project, Boolean>> getNotifications() {
-        ArrayList<String> notificationsIds = new ArrayList<>();
-        for (String key: currentUser.getNotifications().keySet()) {
-            notificationsIds.add(key);
-        }
-
-        return Store.getProjects(notificationsIds).continueWith(new Continuation<ArrayList<Project>, HashMap<Project, Boolean>>() {
-            @Override
-            public HashMap<Project, Boolean> then(@NonNull Task<ArrayList<Project>> task) throws Exception {
-                if(task.isSuccessful()){
-                    HashMap<Project, Boolean> notifications = new HashMap<>();
-
-                    ArrayList<Project> projects = task.getResult();
-                    for (Project p: projects) {
-                        notifications.put(p, currentUser.getNotifications().get(p.getUID()));
-                    }
-                    return notifications;
-                } else {
-                    throw task.getException();
-                }
-            }
-        });
-    }
+//
+//    @Override
+//    public Task<HashMap<Project, Boolean>> getNotifications() {
+//        ArrayList<String> notificationsIds = new ArrayList<>(currentUser.getNotifications().keySet());
+//
+//        return Store.getProjects(notificationsIds).continueWith(new Continuation<ArrayList<Project>, HashMap<Project, Boolean>>() {
+//            @Override
+//            public HashMap<Project, Boolean> then(@NonNull Task<ArrayList<Project>> task) throws Exception {
+//                if(task.isSuccessful()){
+//                    HashMap<Project, Boolean> notifications = new HashMap<>();
+//
+//                    ArrayList<Project> projects = task.getResult();
+//                    for (Project p: projects) {
+//                        notifications.put(p, currentUser.getNotifications().get(p.getUID()));
+//                    }
+//                    return notifications;
+//                } else {
+//                    throw task.getException();
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void reviewApplicant(Project project, User applicant, boolean accept) {

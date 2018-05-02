@@ -116,7 +116,7 @@ public class User implements Parcelable{
         ArrayList<String> notifications = in.createStringArrayList();
         Notifications = new HashMap<>();
         for (String uid: notifications){
-            ReviewedProjects.put(uid, true);
+            Notifications.put(uid, true);
         }
 
         Rating = in.readInt();
@@ -331,16 +331,20 @@ public class User implements Parcelable{
         parcel.writeStringList(ProjectsOwned);
 
         ArrayList<String> projects = new ArrayList<>();
-        for (String uid: ReviewedProjects.keySet()){
-            projects.add(uid);
+        for(String key: ReviewedProjects.keySet()){
+            if(ReviewedProjects.get(key)){
+                projects.add(key);
+            }
         }
         parcel.writeStringList(projects);
 
         ArrayList<String> notifications = new ArrayList<>();
-        for (String uid: Notifications.keySet()){
-            projects.add(uid);
+        for(String key: Notifications.keySet()){
+            if(Notifications.get(key)){
+                notifications.add(key);
+            }
         }
-        parcel.writeStringList(projects);
+        parcel.writeStringList(notifications);
 
         parcel.writeDouble(Rating);
         parcel.writeByte((byte) (Premium ? 1 : 0));
