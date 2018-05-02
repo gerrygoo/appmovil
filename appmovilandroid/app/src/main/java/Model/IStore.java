@@ -38,6 +38,7 @@ interface IAsyncStore {
 
     Task<User> authenticate(String username, String password) throws Errors.AuthException;
     Task<User> register(User user, String password) throws  Errors.RegisterException;
+    Task<Void> resetPassword(String email);
 
     Task<Void> updateUser(User user);
     Task<Void> updateProject(Project project);

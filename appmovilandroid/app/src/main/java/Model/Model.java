@@ -252,4 +252,8 @@ public class Model implements IModel {
             }
         });
     }
+
+    public Task<Void> resetPassword(String email){
+        return Store.resetPassword(email);
+    }
 }

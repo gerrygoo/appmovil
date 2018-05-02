@@ -3,10 +3,13 @@ package mx.itesm.segi.perfectproject;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.TextView;
 
@@ -45,6 +48,39 @@ public class Login extends AppCompatActivity {
                 handleSubmit();
             }
         });
+
+        findViewById(R.id.forgot).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("StaticFieldLeak")
+            @Override
+            public void onClick(View view) {
+                final String email = emailTxt.getText().toString();
+                if(email.isEmpty()){
+                    errorText.setText("Please add an email");
+                } else {
+                    new AsyncTask<Void, Void, Pair<Boolean, String>>(){
+                        @Override
+                        protected Pair<Boolean, String> doInBackground(Void... voids) {
+                            try {
+                                Tasks.await(Model.getInstance().resetPassword(email));
+                                return new Pair<>(true, "Reset password email sent!");
+                            } catch (ExecutionException | InterruptedException e) {
+                                return new Pair<>(false, e.getMessage());
+                            }
+                        }
+
+                        @Override
+                        protected void onPostExecute(Pair<Boolean, String> pair) {
+                            if(pair.first){
+                                errorText.setTextColor(Color.rgb(0,128, 0));
+                            } else {
+                                errorText.setTextColor(Color.RED);
+                            }
+                            errorText.setText(pair.second);
+                        }
+                    }.execute();
+                }
+            }
+        });
     }
 
 
@@ -58,6 +94,8 @@ public class Login extends AppCompatActivity {
                 try {
                     return Tasks.await(Model.getInstance().authenticate(email, password));
                 } catch (Errors.AuthException | InterruptedException | ExecutionException e) {
+                    errorText.setTextColor(Color.RED);
+                    errorText.setText(e.getMessage());
                     e.printStackTrace();
                     return false;
                 }
@@ -68,6 +106,7 @@ public class Login extends AppCompatActivity {
                 if(success){
                     startActivity(new Intent(context, MainScreenActivity.class));
                 } else {
+                    errorText.setTextColor(Color.RED);
                     errorText.setText("Given credentials failed to authenticate.");
                 }
             }
@@ -102,8 +141,6 @@ public class Login extends AppCompatActivity {
         final String
                 email = emailTxt.getText().toString(),
                 password = passwordTxt.getText().toString();
-        final Context context = this;
-
         authenticate(email, password);
     }
 

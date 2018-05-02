@@ -188,7 +188,6 @@ class FirebaseStore implements IAsyncStore {
             @Override
             public Task<User> then(@NonNull Task<AuthResult> task) throws Exception {
                 if(task.isSuccessful()){
-
                     user.setUID(task.getResult().getUser().getUid());
                     return createUser(user);
                 } else {
@@ -196,6 +195,11 @@ class FirebaseStore implements IAsyncStore {
                 }
             }
         });
+    }
+
+    @Override
+    public Task<Void> resetPassword(String email) {
+        return auth.sendPasswordResetEmail(email);
     }
 
     @Override
@@ -273,7 +277,7 @@ class FirebaseStore implements IAsyncStore {
                 user.setProfileImageURL(url.toString());
             }
         }
-        return database.collection("users").document(user.getUID()).set(user.toMap()).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<Void, User>() {
+        return database.collection("users").document(user.getUID()).update(user.toMap()).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<Void, User>() {
             @Override
             public User then(@NonNull Task<Void> task) throws Exception {
                 if(task.isSuccessful()){
