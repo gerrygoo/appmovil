@@ -85,6 +85,7 @@ public class Project implements Parcelable{
         Title = (String) map.get("title");
         ImageUrl = (String) map.get("imageURL");
         Positions = (ArrayList<String>) map.get("positions");
+        Location = (String)(map.get("location"));
         Description = (String) map.get("description");
         StartDate = (Date) map.get("startDate");
         EndDate = (Date) map.get("endDate");

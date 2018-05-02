@@ -96,15 +96,12 @@ class FirebaseStore implements IAsyncStore {
 
     @Override
     public Task<Project> getProject(final String uid) {
-
         return database.collection("projects").document(uid).get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<DocumentSnapshot, Project>() {
             @Override
             public Project then(@NonNull Task<DocumentSnapshot> task) throws Exception {
                 if(task.isSuccessful()){
                     DocumentSnapshot document = task.getResult();
-
-                    Project result = new Project(document.getData(), uid);
-                    return result;
+                    return new Project(document.getData(), document.getId());
                 } else {
                     throw task.getException();
                 }
@@ -244,6 +241,8 @@ class FirebaseStore implements IAsyncStore {
                     e.printStackTrace();
                 }
             }
+        } else {
+            taskCompletionSource.setResult(project.getImageUrl());
         }
         return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
             @Override

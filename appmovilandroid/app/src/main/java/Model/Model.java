@@ -1,6 +1,7 @@
 package Model;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
@@ -81,16 +82,12 @@ public class Model implements IModel {
 
     @Override
     public Task<ArrayList<User>> getTeam(final String projectUID) {
-        return Store.getProject(projectUID).continueWith(new Continuation<Project, ArrayList<User>>() {
+        return Store.getProject(projectUID).continueWithTask(new Continuation<Project, Task<ArrayList<User>>>() {
             @Override
-            public ArrayList<User> then(@NonNull Task<Project> task) throws Exception {
+            public Task<ArrayList<User>> then(@NonNull Task<Project> task) throws Exception {
                 if(task.isSuccessful()){
-                    try {
-                        ArrayList<String> ids = Tasks.await(Store.getProject(projectUID)).getTeam();
-                        return Tasks.await(Store.getUsers(ids));
-                    } catch (ExecutionException | InterruptedException e) {
-                        throw e;
-                    }
+                    ArrayList<String> ids = task.getResult().getTeam();
+                    return Store.getUsers(ids);
                 } else {
                     throw task.getException();
                 }
@@ -213,15 +210,26 @@ public class Model implements IModel {
     }
 
     @Override
-    public void reviewProject(final Project project, boolean accept) {
+    public void reviewProject(final Project project, final boolean accept) {
         currentUser.reviewProject(project, accept);
         if(accept) {
             project.addApplicant(currentUser);
         }
-        Store.updateUser(currentUser).continueWith(new Continuation<Void, Void>() {
+        Store.updateUser(currentUser).continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+                if(task.isSuccessful()) {
+                    if (accept) {
+                        Log.e("Review Project", "starting");
+                        return Store.updateProject(project);
+                    }
+                }
+                return null;
+            }
+        }).continueWith(new Continuation<Void, Void>() {
             @Override
             public Void then(@NonNull Task<Void> task) throws Exception {
-                Tasks.await(Store.updateProject(project));
+                Log.e("Review Project", "ended");
                 return null;
             }
         });

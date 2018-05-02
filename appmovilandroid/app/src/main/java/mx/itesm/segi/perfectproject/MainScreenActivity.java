@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -248,6 +249,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         if(transitioning || currentProject >= projects.size()) {
             return;
         }
+
         Model.getInstance().reviewProject(projects.get(currentProject), true);
         float screenWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         animateDragTo(+screenWidth, startingY).addListener(new Animator.AnimatorListener() {
