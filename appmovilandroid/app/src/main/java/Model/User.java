@@ -163,7 +163,7 @@ public class User implements Parcelable{
 
     public void removeProjectMember(Project project)
     {
-        ProjectsMember.remove(ProjectsMember.indexOf(project));
+        ProjectsMember.remove(project.getUID());
     }
 
     public void addProjects(Project[] projects){
@@ -180,7 +180,7 @@ public class User implements Parcelable{
 
     public void removeProjectOwned(Project project)
     {
-        ProjectsOwned.remove(ProjectsOwned.indexOf(project));
+        ProjectsOwned.remove(project.getUID());
     }
 
     public void addProjectsOwned(Project[] projects){

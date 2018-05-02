@@ -3,7 +3,6 @@ package Model;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by ianne on 1/04/2018.
@@ -23,7 +22,7 @@ public interface IModel {
     void reviewProject(Project project, boolean accept);
     Task<Void> createProject(Project project) throws Errors.CreateProjectException;
     Task<Void> updateProject(Project project);
-    void deleteProject(Project project);
+    Task<Void> deleteProject(Project project);
     void reviewApplicant(Project project, User applicant, boolean accept);
 
     Task<Boolean> authenticate(String username, String password) throws Errors.AuthException;
@@ -34,5 +33,6 @@ public interface IModel {
     void register(User user, String password) throws  Errors.RegisterException;
 
     Task<ArrayList<Project>> getOwnedProjects();
+    Task<Void> rateUser(String uid, double rating);
     //Task<HashMap<Project, Boolean>> getNotifications();
 }
