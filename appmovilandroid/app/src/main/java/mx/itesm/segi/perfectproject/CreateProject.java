@@ -26,8 +26,11 @@ import android.widget.ImageButton;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import Model.Errors;
@@ -183,7 +186,7 @@ public class CreateProject extends Fragment {
         } else if (Description.length() == 0) {
             Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
         } else {
-            String[] PositionsArr = Positions.getText().toString().split(" ");
+            ArrayList positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
             Project project = new Project(
@@ -191,7 +194,7 @@ public class CreateProject extends Fragment {
                     Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),
                     BMimage,
-                    PositionsArr,
+                    positions,
                     Description.getText().toString(),
                     Location.getText().toString(),
                     Start,

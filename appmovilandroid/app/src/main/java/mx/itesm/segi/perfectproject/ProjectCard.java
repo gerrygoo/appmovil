@@ -132,7 +132,10 @@ public class ProjectCard extends Fragment {
         StartDate.setText(DateFormat.getDateFormat(getContext()).format(project.getStartDate()));
         Duration.setText(DateFormat.getDateFormat(getContext()).format(project.getEndDate()));
         StringBuilder positions = new StringBuilder();
-        String[] projectPositions = project.getPositions();
+
+        String[] projectPositions = new String[project.getPositions().size()];
+        project.getPositions().toArray(projectPositions);
+
         for(int i = 0; i < projectPositions.length; i++){
             positions.append(projectPositions[i]);
             if(i != projectPositions.length - 1) {

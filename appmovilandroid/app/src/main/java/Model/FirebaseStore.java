@@ -1,61 +1,282 @@
 package Model;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 
-class FirebaseStore implements IStore {
+class FirebaseStore implements IAsyncStore {
 
-    @Override
-    public User getUser(String uid) {
-        return null;
+    private FirebaseFirestore database;
+    private FirebaseAuth auth;
+
+    FirebaseStore() {
+        database = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
     }
 
     @Override
-    public ArrayList<String> getAllProjectsUIDs() {
-        return null;
+    public Task<User> getUser(String uid) {
+        return database.collection("users").document(uid).get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<DocumentSnapshot, User>() {
+            @Override
+            public User then(@NonNull Task<DocumentSnapshot> task) throws Exception {
+                if(task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    if(document.exists()) {
+                        User result = new User(document.getData(), document.getId());
+                        return result;
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            }
+        });
     }
 
     @Override
-    public Project getProject(String uid) {
-        return null;
+    public Task<ArrayList<User>> getUsers(final ArrayList<String> userUIDs) {
+        final HashSet<String> ids = new HashSet<>(userUIDs);
+
+        return database.collection("users").get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR ,new Continuation<QuerySnapshot, ArrayList<User>>() {
+            @Override
+            public ArrayList<User> then(@NonNull Task<QuerySnapshot> task) throws Exception {
+                if(task.isSuccessful()){
+                    QuerySnapshot documents = task.getResult();
+                    ArrayList<User> result = new ArrayList<>();
+                    for (DocumentSnapshot doc: documents){
+                        if(ids.contains(doc.getId())){
+                            result.add(new User(doc.getData(), doc.getId()));
+                        }
+                    }
+                    return result;
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public ArrayList<Project> getProjects(ArrayList<String> uids) {
-        return null;
+    public Task<ArrayList<String>> getAllProjectsUIDs() {
+        return database.collection("projects").get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<QuerySnapshot, ArrayList<String>>() {
+            @Override
+            public ArrayList<String> then(@NonNull Task<QuerySnapshot> task) throws Exception {
+                if(task.isSuccessful()){
+                    QuerySnapshot documents = task.getResult();
+                    ArrayList<String> result = new ArrayList<>();
+                    for (DocumentSnapshot doc: documents.getDocuments()) {
+                        String current = doc.getId();
+                        result.add(current);
+                    }
+                    return result;
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public void createProject(Project project) throws Errors.CreateProjectException {
+    public Task<Project> getProject(final String uid) {
+
+        return database.collection("projects").document(uid).get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<DocumentSnapshot, Project>() {
+            @Override
+            public Project then(@NonNull Task<DocumentSnapshot> task) throws Exception {
+                if(task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+
+                    Project result = new Project(document.getData(), uid);
+                    return result;
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
 
     }
 
     @Override
-    public User authenticate(String username, String password) throws Errors.AuthException {
-        return null;
+    public Task<ArrayList<Project>> getProjects(ArrayList<String> uids) {
+        final HashSet<String> ids = new HashSet<>(uids);
+
+        return database.collection("projects").get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<QuerySnapshot, ArrayList<Project>>() {
+            @Override
+            public ArrayList<Project> then(@NonNull Task<QuerySnapshot> task) throws Exception {
+                if(task.isSuccessful()){
+                    QuerySnapshot documents = task.getResult();
+                    ArrayList<Project> result = new ArrayList<>();
+                    for (DocumentSnapshot doc: documents.getDocuments()) {
+                        if(ids.contains(doc.getId())) {
+                            result.add(new Project(doc.getData(), doc.getId()));
+                        }
+                    }
+                    return result;
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public boolean tryAuthenticate(String username, String password) {
-        return false;
+    public Task<Void> createProject(final Project project) throws Errors.CreateProjectException {
+
+        final TaskCompletionSource<String> taskCompletionSource = new TaskCompletionSource<>();
+        Task<String> upload = taskCompletionSource.getTask();
+
+        if(project.getImageUrl() == null || project.getImageUrl().isEmpty()) {
+            if(project.getImage() == null){
+                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
+                taskCompletionSource.setResult(url);
+            }else {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                project.getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                Uri url = null;
+                try {
+                    FirebaseStorage.getInstance().getReference().child("images/" + project.getUID() + ".jpg").putBytes(stream.toByteArray()).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<String>>() {
+                        @Override
+                        public Task<String> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if(task.isSuccessful()){
+                                taskCompletionSource.setResult(task.getResult().getDownloadUrl().toString());
+                            }
+                            else {
+                                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
+                                taskCompletionSource.setResult(url);
+                            }
+                            return taskCompletionSource.getTask();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<String> task) throws Exception {
+                if(task.isSuccessful()) {
+                    project.setImageUrl(task.getResult());
+                    return database.collection("projects").document(project.getUID()).set(project.toMap()).continueWith(new Continuation<Void, Void>() {
+                        @Override
+                        public Void then(@NonNull Task<Void> task) throws Exception {
+                            if (task.isSuccessful()) {
+                                return null;
+                            } else {
+                                throw task.getException();
+                            }
+                        }
+                    });
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public void register(User user, String password) throws Errors.RegisterException {
-
+    public Task<User> authenticate(final String username, final String password) throws Errors.AuthException {
+        return auth.signInWithEmailAndPassword(username, password).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<AuthResult, String>() {
+            @Override
+            public String then(@NonNull Task<AuthResult> task) throws Exception {
+                if(task.isSuccessful()){
+                    return task.getResult().getUser().getUid();
+                } else {
+                    throw task.getException();
+                }
+            }
+        }).continueWithTask(new Continuation<String, Task<User>>() {
+            @Override
+            public Task<User> then(@NonNull Task<String> task) throws Exception {
+                if(task.isSuccessful()) {
+                    return getUser(task.getResult());
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public boolean tryRegister(User user, String password) {
-        return false;
+    public Task<User> register(final User user, String password) throws Errors.RegisterException {
+        return auth.createUserWithEmailAndPassword(user.getEmail(), password).continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<AuthResult, Task<User>>() {
+            @Override
+            public Task<User> then(@NonNull Task<AuthResult> task) throws Exception {
+                if(task.isSuccessful()){
+
+                    user.setUID(task.getResult().getUser().getUid());
+                    return createUser(user);
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     @Override
-    public void updateUser(User user) {
-
+    public Task<Void> updateUser(User user) {
+        return createUser(user).continueWithTask(new Continuation<User, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<User> task) throws Exception {
+                TaskCompletionSource result = new TaskCompletionSource();
+                result.setResult(null);
+                return result.getTask();
+            }
+        });
     }
 
     @Override
-    public void updateProject(Project project) {
+    public Task<Void> updateProject(Project project){
+        try {
+            return createProject(project);
+        } catch (Errors.CreateProjectException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    private Task<User> createUser(final User user){
+        if(user.getProfileImageURL() == null || user.getProfileImageURL().isEmpty()) {
+            if(user.getProfileImage() == null){
+                user.setProfileImageURL("https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3");
+            } else {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                user.getProfileImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                Uri url = null;
+                try {
+                    url = Tasks.await(FirebaseStorage.getInstance().getReference().child("images/profiles/" + user.getUID() + ".jpg").putBytes(stream.toByteArray())).getDownloadUrl();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                user.setProfileImageURL(url.toString());
+            }
+        }
+        return database.collection("users").document(user.getUID()).set(user.toMap()).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<Void, User>() {
+            @Override
+            public User then(@NonNull Task<Void> task) throws Exception {
+                if(task.isSuccessful()){
+                    return user;
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 }

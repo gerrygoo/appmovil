@@ -1,19 +1,29 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 import Model.Model;
 import Model.User;
@@ -74,24 +84,46 @@ public class YourProjectsFrag extends Fragment {
 
             @Override
             public void clearNew(int position) {
-                Model.getInstance().viewNotificaction(projects.get(position));
+                Model.getInstance().viewNotification(projects.get(position));
             }
         };
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void loadProjects() {
         this.user = getArguments().getParcelable(ARG_USER);
         this.owned = getArguments().getBoolean(ARG_OWNED);
-        AdapterRV adapterRV;
 
-        if(owned){
-            this.projects = user.getProjectsOwned();
-            adapterRV = new AdapterRV(user.getProjectsOwned(), true, listener);
-        } else {
-            adapterRV = new AdapterRV(user.getProjectsMember(), false, listener);
-            adapterRV.setNotifications(user.getNotifications());
-        }
-        rvYourProjects.setAdapter(adapterRV);
+        new AsyncTask<Void, Void, Pair<ArrayList<Project>, HashMap<Project, Boolean>>>(){
+            @Override
+            protected Pair<ArrayList<Project>, HashMap<Project, Boolean>> doInBackground(Void... voids) {
+                try {
+                    if(owned) {
+                        ArrayList<Project> projects = Tasks.await(Model.getInstance().getOwnedProjects());
+                        return new Pair<>(projects, null);
+                    } else {
+                        ArrayList<Project> projects = Tasks.await(Model.getInstance().getMyProjects());
+                        HashMap<Project, Boolean> notifications = Tasks.await(Model.getInstance().getNotifications());
+                        return new Pair<>(projects, notifications);
+                    }
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Pair<ArrayList<Project>, HashMap<Project, Boolean>> pair) {
+                if(owned){
+                    AdapterRV adapterRV = new AdapterRV(pair.first, true, listener);
+                    rvYourProjects.setAdapter(adapterRV);
+                } else {
+                    AdapterRV adapterRV = new AdapterRV(pair.first, false, listener);
+                    adapterRV.setNotifications(pair.second);
+                    rvYourProjects.setAdapter(adapterRV);
+                }
+            }
+        }.execute();
     }
 
     private void renderProject(int position) {

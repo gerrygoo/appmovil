@@ -21,6 +21,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
 import java.util.ArrayList;
 
 import Model.Model;
@@ -178,8 +181,17 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     private void renderBrowse(){
         currentProject = 0;
-        this.projects = model.getAvailableProjects();
-        renderCards(currentProject, currentProject+1);
+        model.getAvailableProjects().addOnCompleteListener(new OnCompleteListener<ArrayList<Project>>() {
+            @Override
+            public void onComplete(@NonNull Task<ArrayList<Project>> task) {
+                if (task.isSuccessful()) {
+                    projects = task.getResult();
+                    renderCards(currentProject, currentProject + 1);
+                } else {
+                    task.getException().printStackTrace();
+                }
+            }
+        });
     }
 
     private void renderCards(int first, int second){
