@@ -3,6 +3,7 @@ package mx.itesm.segi.perfectproject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.Switch;
 
@@ -212,7 +214,7 @@ public class ProfileFrag extends Fragment {
                 InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
                 Bitmap BMimage = BitmapFactory.decodeStream(inputStream);
                 ivProfile.setImageBitmap(BMimage);
-                user.setProfPic(BMimage);
+                user.setProfileImage(BMimage);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -225,7 +227,7 @@ public class ProfileFrag extends Fragment {
 
     private void loadProfileInfo(View v) {
         user = getArguments().getParcelable(ARG_USER);
-        ivProfile.setImageBitmap(user.getProfPic());
+        ivProfile.setImageBitmap(user.getProfileImage());
         tvCompany.setText(user.getCompany());
         tvName.setText(user.getName());
         rbRating.setRating((float) user.getRating());
@@ -251,16 +253,23 @@ public class ProfileFrag extends Fragment {
                 user.addSkill(s.getText().toString());
             }
         }
+
+        final ProgressBar bar = getActivity().findViewById(R.id.mainProgress);
+        bar.setVisibility(View.VISIBLE);
         new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
                     Tasks.await(Model.getInstance().updateCurrentUser());
-
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
                 return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                bar.setVisibility(View.INVISIBLE);
             }
         }.execute();
     }

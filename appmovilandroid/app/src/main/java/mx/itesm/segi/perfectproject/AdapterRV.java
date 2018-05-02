@@ -2,6 +2,7 @@ package mx.itesm.segi.perfectproject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.Tasks;
@@ -38,13 +40,15 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
     private ArrayList<Project> projects;
     private HashMap<String, Boolean> notifications;
     private boolean owned;
+    private ProgressBar bar;
 
     private YourProjectsFrag.Listener listener;
 
-    public AdapterRV(ArrayList<Project> projects, Boolean owned, YourProjectsFrag.Listener listener) {
+    public AdapterRV(ArrayList<Project> projects, Boolean owned, YourProjectsFrag.Listener listener, ProgressBar bar) {
         this.projects = projects;
         this.listener = listener;
         this.owned = owned;
+        this.bar = bar;
     }
 
     @Override
@@ -79,6 +83,8 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
         if(owned)
         {
             final LinearLayout container = card.findViewById(R.id.project_card_container);
+
+            bar.setVisibility(View.VISIBLE);
 
             new AsyncTask<Void, Void, ArrayList<User>>(){
 
@@ -141,6 +147,8 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                         applicantCard.addView(deny);
 
                         container.addView(applicantCard);
+
+                        bar.setVisibility(View.INVISIBLE);
                     }
                 }
             }.execute();

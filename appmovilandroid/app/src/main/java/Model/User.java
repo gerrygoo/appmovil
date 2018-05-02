@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,6 @@ public class User implements Parcelable{
     private String Email;
     private String Name;
     private String Company;
-    private Bitmap ProfPic;
     private ArrayList<String> Skills; //Probably own class
     private ArrayList<String> ProjectsMember;
     private ArrayList<String> ProjectsOwned;
@@ -163,7 +163,7 @@ public class User implements Parcelable{
 
     public void removeProjectMember(Project project)
     {
-        ProjectsMember.remove(ProjectsMember.indexOf(project));
+        ProjectsMember.remove(project.getUID());
     }
 
     public void addProjects(Project[] projects){
@@ -180,7 +180,7 @@ public class User implements Parcelable{
 
     public void removeProjectOwned(Project project)
     {
-        ProjectsOwned.remove(ProjectsOwned.indexOf(project));
+        ProjectsOwned.remove(project.getUID());
     }
 
     public void addProjectsOwned(Project[] projects){
@@ -225,10 +225,6 @@ public class User implements Parcelable{
         Company = company;
     }
 
-    public Bitmap getProfPic() {
-        return ProfPic;
-    }
-
     public ArrayList<String> getSkills() {
         return Skills;
     }
@@ -270,7 +266,7 @@ public class User implements Parcelable{
     }
 
     public void setProfileImage(Bitmap profileImage) {
-        ProfileImage = profileImage;
+        ProfileImage = Utils.bitmapToThumbnail(profileImage);
     }
 
     void viewNotification(Project project){
@@ -299,10 +295,6 @@ public class User implements Parcelable{
 
     public void clearSkills(){
         Skills.clear();
-    }
-
-    public void setProfPic(Bitmap profPic) {
-        ProfPic = profPic;
     }
 
     @Override
@@ -366,7 +358,12 @@ public class User implements Parcelable{
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            ProfileImage = bitmap;
+
+            if(bitmap == null){
+                ProfileImage = bitmap;
+            } else {
+                ProfileImage = Utils.bitmapToThumbnail(bitmap);
+            }
             finishLoadingImage = true;
             if(imageListener != null){
                 imageListener.onImageAvailable(bitmap);

@@ -3,6 +3,7 @@ package mx.itesm.segi.perfectproject;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.tasks.Tasks;
 
@@ -255,6 +257,9 @@ public class CreateProject extends Fragment {
             );
             Log.i("Exito", project.toString());
 
+            final ProgressBar bar = getActivity().findViewById(R.id.mainProgress);
+            bar.setVisibility(View.VISIBLE);
+
             new AsyncTask<Void, Void, Void>(){
                 @Override
                 protected Void doInBackground(Void... voids) {
@@ -276,6 +281,7 @@ public class CreateProject extends Fragment {
                     fragment.setArguments(args);
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, fragment).addToBackStack(MainScreenActivity.BACK_STACK);
                     transaction.commit();
+                    bar.setVisibility(View.INVISIBLE);
                 }
             }.execute();
         }
@@ -313,6 +319,10 @@ public class CreateProject extends Fragment {
                     End
             );
             Log.i("Exito", project.toString());
+
+            final ProgressBar bar = getActivity().findViewById(R.id.mainProgress);
+            bar.setVisibility(View.VISIBLE);
+
             new AsyncTask<Void, Void, Void>(){
 
                 @Override
@@ -336,6 +346,8 @@ public class CreateProject extends Fragment {
                     Positions.setText("");
                     Location.setText("");
                     Description.setText("");
+
+                    bar.setVisibility(View.INVISIBLE);
                 }
             }.execute();
         }
