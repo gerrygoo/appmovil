@@ -14,12 +14,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 class FirebaseStore implements IAsyncStore {
 
@@ -203,15 +206,14 @@ class FirebaseStore implements IAsyncStore {
     }
 
     @Override
-    public Task<Void> updateUser(User user) {
-        return createUser(user).continueWithTask(new Continuation<User, Task<Void>>() {
-            @Override
-            public Task<Void> then(@NonNull Task<User> task) throws Exception {
-                TaskCompletionSource result = new TaskCompletionSource();
-                result.setResult(null);
-                return result.getTask();
-            }
-        });
+    public Task<Void> updateUser(final User user) {
+
+        Map<String, Object> newUser = user.toMap();
+        
+        newUser.remove("projectsMember");
+        newUser.remove("review");
+
+       return database.collection("users").document(user.getUID()).update(newUser);
     }
 
     @Override
@@ -277,7 +279,7 @@ class FirebaseStore implements IAsyncStore {
                 user.setProfileImageURL(url.toString());
             }
         }
-        return database.collection("users").document(user.getUID()).update(user.toMap()).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<Void, User>() {
+        return database.collection("users").document(user.getUID()).set(user.toMap(), SetOptions.merge()).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<Void, User>() {
             @Override
             public User then(@NonNull Task<Void> task) throws Exception {
                 if(task.isSuccessful()){
