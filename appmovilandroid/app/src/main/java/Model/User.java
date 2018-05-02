@@ -71,12 +71,22 @@ public class User implements Parcelable{
         Collections.addAll(ProjectsMember, projects);
     }
 
+    public void removeProjectMember(Project project)
+    {
+        ProjectsMember.remove(ProjectsMember.indexOf(project));
+    }
+
     public void addProjects(Project[] projects){
         Collections.addAll(ProjectsMember, projects);
     }
 
     public void addProjectOwned(Project ...projects){
         Collections.addAll(ProjectsOwned, projects);
+    }
+
+    public void removeProjectOwned(Project project)
+    {
+        ProjectsOwned.remove(ProjectsOwned.indexOf(project));
     }
 
     public void addProjectsOwned(Project[] projects){
