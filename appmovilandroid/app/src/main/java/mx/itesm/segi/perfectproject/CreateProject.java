@@ -190,7 +190,7 @@ public class CreateProject extends Fragment {
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
             Project project = new Project(
-                    "1234",
+                    null,
                     Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),
                     BMimage,
