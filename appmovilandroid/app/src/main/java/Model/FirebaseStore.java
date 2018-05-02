@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -169,26 +170,50 @@ class FirebaseStore implements IAsyncStore {
             }
         }
 
-        return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(@NonNull Task<String> task) throws Exception {
-                if(task.isSuccessful()) {
-                    project.setImageUrl(task.getResult());
-                    return database.collection("projects").document(project.getUID()).set(project.toMap()).continueWith(new Continuation<Void, Void>() {
-                        @Override
-                        public Void then(@NonNull Task<Void> task) throws Exception {
-                            if (task.isSuccessful()) {
-                                return null;
-                            } else {
-                                throw task.getException();
+        if(project.getUID() == null) {
+            return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
+                @Override
+                public Task<Void> then(@NonNull Task<String> task) throws Exception {
+                    if (task.isSuccessful()) {
+                        project.setImageUrl(task.getResult());
+                        return database.collection("projects").add(project.toMap()).continueWith(new Continuation<DocumentReference, Void>() {
+                            @Override
+                            public Void then(@NonNull Task<DocumentReference> task) throws Exception {
+                                if (task.isSuccessful()) {
+                                    project.setUID(task.getResult().getId());
+                                    return null;
+                                } else {
+                                    throw task.getException();
+                                }
                             }
-                        }
-                    });
-                } else {
-                    throw task.getException();
+                        });
+                    } else {
+                        throw task.getException();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
+                @Override
+                public Task<Void> then(@NonNull Task<String> task) throws Exception {
+                    if (task.isSuccessful()) {
+                        project.setImageUrl(task.getResult());
+                        return database.collection("projects").document(project.getUID()).set(project.toMap()).continueWith(new Continuation<Void, Void>() {
+                            @Override
+                            public Void then(@NonNull Task<Void> task) throws Exception {
+                                if (task.isSuccessful()) {
+                                    return null;
+                                } else {
+                                    throw task.getException();
+                                }
+                            }
+                        });
+                    } else {
+                        throw task.getException();
+                    }
+                }
+            });
+        }
     }
 
     @Override
