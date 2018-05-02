@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,7 @@ public class ProfileFrag extends Fragment {
     public final static String ARG_MODE = "mode";
     private final static int PICK_PHOTO_FOR_AVATAR=1;
 
-    private int numberOfLines=0;
+    private int numberOfLines;
     private EditText tvName;
     private EditText tvCompany;
     private EditText tvCurriculum;
@@ -82,7 +83,6 @@ public class ProfileFrag extends Fragment {
         ivProfile=v.findViewById(R.id.ivProfile);
         rateNum = v.findViewById(R.id.rateNumber);
         addSkill = v.findViewById(R.id.btnAddSkill);
-        tvSkill = v.findViewById(R.id.etSkills);
 
 //        tvCurriculum.setKeyListener(null);
         Mode = v.findViewById(R.id.sEmployer);
@@ -93,6 +93,8 @@ public class ProfileFrag extends Fragment {
             }
         });
 
+        loadProfileInfo(v);
+        Log.i("Skills:",user.getSkills().toString());
         tvCompany.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -128,22 +130,64 @@ public class ProfileFrag extends Fragment {
         addSkill.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Add_Line(v);
+                user.addSkill("");
+                Add_New_Line(v);
+
+               // saveSkill(v);
             }
         });
 
-        loadProfileInfo();
         return v;
     }
-
-    public void Add_Line(View v) {
+/*
+    private void saveSkill(View v) {
+        LinearLayout ll = v.findViewById(R.id.SkillsLayout);
+        for(int i=0;i<numberOfLines;i++){
+            View et = ll.getChildAt(i);
+            EditText s = (EditText)et;
+            Log.i("Item selected",s.getText().toString());
+        }
+    }
+*/
+    public void Add_New_Line(View v) {
         LinearLayout ll = v.findViewById(R.id.SkillsLayout);
         // add edittext
-        EditText et = new EditText(getActivity().getApplicationContext());
+        final EditText et = new EditText(getActivity().getApplicationContext());
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         et.setLayoutParams(p);
-        et.setHint(tvSkill.getHint().toString());
-        et.setId(numberOfLines + 1);
+        et.setHint("Skills");
+        et.setId(numberOfLines);
+        et.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(!b && ((EditText)view).getText().toString().isEmpty() ) {
+                    view.setVisibility(EditText.GONE);
+                    view=null;
+                }
+            }
+        });
+        ll.addView(et);
+        numberOfLines++;
+    }
+
+    public void Add_Line(View v, String skill) {
+        LinearLayout ll = v.findViewById(R.id.SkillsLayout);
+        // add edittext
+        final EditText et = new EditText(getActivity().getApplicationContext());
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        et.setLayoutParams(p);
+        et.setHint("Skills");
+        et.setText(skill);
+        et.setId(numberOfLines);
+        et.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(!b && ((EditText)view).getText().toString().isEmpty() ) {
+                    view.setVisibility(EditText.GONE);
+                    view=null;
+                }
+            }
+        });
         ll.addView(et);
         numberOfLines++;
     }
@@ -173,15 +217,33 @@ public class ProfileFrag extends Fragment {
         }
     }
 
-    private void loadProfileInfo() {
+    private void loadProfileInfo(View v) {
         user = getArguments().getParcelable(ARG_USER);
         ivProfile.setImageBitmap(user.getProfPic());
         tvCompany.setText(user.getCompany());
-        //tvCurriculum.setText(user.getSkills().toString());
         tvName.setText(user.getName());
         rbRating.setRating(user.getRating());
         rateNum.setText(String.valueOf(user.getRating()));
         Mode.setChecked(getArguments().getBoolean(ARG_MODE));
+        for(int i=0;i<user.getSkills().size(); i++){
+            Add_Line(v, user.getSkills().get(i));
+        }
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d("Profile", "stop");
+        LinearLayout ll = getActivity().findViewById(R.id.SkillsLayout);
+        user.clearSkills();
+        for(int i=0;i<numberOfLines;i++){
+            View et = ll.getChildAt(i);
+            EditText s = (EditText)et;
+            if(!s.getText().toString().isEmpty()){
+                user.addSkill(s.getText().toString());
+            }
+        }
     }
 
     public interface OnSwitchToggleListener {

@@ -83,8 +83,12 @@ public class User implements Parcelable{
         Collections.addAll(ProjectsOwned, projects);
     }
 
-    public void setSkills(ArrayList<String> skills){
-        this.Skills = skills;
+    public void setSkill(int key,String skill){
+        Skills.set(key, skill);
+    }
+
+    public void addSkill(String skill){
+       Skills.add(skill);
     }
 
     public String getUID() {
@@ -163,8 +167,16 @@ public class User implements Parcelable{
 
     }
 
+    public void removeSkill(int index){
+        Skills.remove(index);
+    }
+
     protected void setReviewedProjects(HashMap<String, Boolean> reviewedProjects) {
         ReviewedProjects = reviewedProjects;
+    }
+
+    public void clearSkills(){
+        Skills.clear();
     }
 
     public void setProfPic(Bitmap profPic) {
