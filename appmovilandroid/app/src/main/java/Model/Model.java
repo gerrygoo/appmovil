@@ -6,11 +6,8 @@ import android.util.Log;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by ianne on 2/04/2018.
@@ -149,6 +146,11 @@ public class Model implements IModel {
     public Task<ArrayList<Project>> getOwnedProjects() {
         return Store.getProjects(currentUser.getProjectsOwned());
     }
+
+    @Override
+    public Task<Void> rateUser(String uid, double rating) {
+        return Store.rateUser(uid, rating);
+    }
 //
 //    @Override
 //    public Task<HashMap<Project, Boolean>> getNotifications() {
@@ -234,21 +236,39 @@ public class Model implements IModel {
     }
 
     @Override
-    public void deleteProject(final Project project)
+    public Task<Void> deleteProject(final Project project)
     {
         ArrayList<String> membersIds = project.getTeam();
-        Store.getUsers(membersIds).continueWith(new Continuation<ArrayList<User>, Void>() {
-
+        return Store.getUsers(membersIds).continueWithTask(new Continuation<ArrayList<User>, Task<Void>>() {
             @Override
-            public Void then(@NonNull Task<ArrayList<User>> task) throws Exception {
+            public Task<Void> then(@NonNull Task<ArrayList<User>> task) throws Exception {
+                TaskCompletionSource<Void> tsc = new TaskCompletionSource<>();
+                Task<Void> parent = tsc.getTask();
+
                 ArrayList<User> members = task.getResult();
-                for(int i = 0;i < members.size();i++)
-                {
-                    members.get(i).removeProjectMember(project);
-                    Tasks.await(Store.updateUser(members.get(i)));
+
+                for(final User member: members){
+                    member.removeProjectMember(project);
+
+                    parent.continueWithTask(new Continuation<Void, Task<Void>>() {
+                        @Override
+                        public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+                            return Store.updateUser(member);
+                        }
+                    });
                 }
-                Tasks.await(Store.deleteProject(project));
-                return null;
+                tsc.setResult(null);
+                return parent;
+            }
+        }).continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+                return Store.deleteProject(project);
+            }
+        }).continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+                return Store.removeProjectOwned(currentUser, project.getUID());
             }
         });
     }

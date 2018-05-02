@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -20,6 +21,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 
 import org.w3c.dom.Text;
@@ -54,6 +59,9 @@ public class ProjectInfoFrag extends Fragment {
     private FloatingActionButton fabEdit;
     private boolean owned;
 
+    private ArrayList<User> gteam;
+
+
     public ProjectInfoFrag() {
         // Required empty public constructor
     }
@@ -78,6 +86,7 @@ public class ProjectInfoFrag extends Fragment {
                     Project project = getArguments().getParcelable(ARG_PROJECT);
                     User owner = Tasks.await(Model.getInstance().getUserByID(project.getOwnerUID()));
                     ArrayList<User> team = Tasks.await(Model.getInstance().getTeam(project.getUID()));
+                    gteam = team;
                     return new Pair<>(owner, team);
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
@@ -129,7 +138,7 @@ public class ProjectInfoFrag extends Fragment {
         projectManager.setPadding(8, 8, 8, 8);
         projectManager.setTextSize(20);
         projectManager.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-        projectManager.setText("PM: " + owner);
+        projectManager.setText("PM: " + owner.getName().toString());
         projectManager.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -194,6 +203,68 @@ public class ProjectInfoFrag extends Fragment {
                     confirm.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
+
+                            TaskCompletionSource<Void> tcs = new TaskCompletionSource();
+                            Task<Void> task = tcs.getTask();
+                            final CharSequence[] array = {"1", "2", "3", "4", "5"};
+                            for(final User guy: gteam) {
+
+                                task.continueWithTask(new Continuation<Void, Task<Void>>() {
+                                    @Override
+                                    public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+
+                                        final TaskCompletionSource<Void> tcsin = new TaskCompletionSource();
+                                        final int[] lastClicked = {0};
+
+                                        AlertDialog.Builder builder;
+                                        builder = new AlertDialog.Builder(getActivity(), android.R.style.Theme_Material_Dialog_Alert);
+                                        builder.setTitle("Rate " + guy.getName() + " as a collaborator (1 is bad)")
+                                                .setSingleChoiceItems(array, 0, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface arg0, int arg1) {
+                                                        lastClicked[0] = arg1;
+                                                    }
+                                                })
+                                                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                    }
+                                                })
+                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+
+                                                    @SuppressLint("StaticFieldLeak")
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        new AsyncTask<Void, Void, Void>(){
+
+                                                            @Override
+                                                            protected Void doInBackground(Void... voids) {
+                                                                try {
+
+                                                                    Tasks.await(Model.getInstance().rateUser(guy.getUID(), (lastClicked[0]+1.0) ) );
+
+                                                                } catch (ExecutionException | InterruptedException e) {
+                                                                    e.printStackTrace();
+                                                                }
+                                                                return null;
+                                                            }
+
+                                                            @Override
+                                                            protected void onPostExecute(Void aVoid) {
+                                                                Log.i("Rated" + guy.getName(), String.valueOf(lastClicked[0]+1.0));
+                                                            }
+
+                                                        }.execute();
+                                                    }
+                                                })
+                                                .show();
+
+
+                                        return tcsin.getTask();
+                                    }
+                                });
+
+                            }
+
+                            tcs.setResult(null);
                             deleteProject();
                         }
                     });
@@ -203,6 +274,7 @@ public class ProjectInfoFrag extends Fragment {
                             dialogInterface.dismiss();
                         }
                     });
+
                     confirm.show();
                 }
             });
@@ -215,15 +287,20 @@ public class ProjectInfoFrag extends Fragment {
     }
 
     private void deleteProject() {
-        Model.getInstance().deleteProject(project);
-        Fragment yourProjects = new YourProjectsFrag();
-        Bundle argYourProjects = new Bundle();
+        Model.getInstance().deleteProject(project).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Fragment yourProjects = new YourProjectsFrag();
+                Bundle argYourProjects = new Bundle();
 
-        argYourProjects.putParcelable(YourProjectsFrag.ARG_USER, Model.getInstance().getCurrentUser());
-        argYourProjects.putBoolean(YourProjectsFrag.ARG_OWNED, owned);
+                argYourProjects.putParcelable(YourProjectsFrag.ARG_USER, Model.getInstance().getCurrentUser());
+                argYourProjects.putBoolean(YourProjectsFrag.ARG_OWNED, owned);
 
-        yourProjects.setArguments(argYourProjects);
-        getFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, yourProjects).commit();
+                yourProjects.setArguments(argYourProjects);
+                getFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, yourProjects).commit();
+
+            }
+        });
     }
 
 }

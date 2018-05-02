@@ -295,4 +295,27 @@ class FirebaseStore implements IAsyncStore {
     public Task<Void> deleteProject(Project project) {
         return database.collection("projects").document(project.getUID()).delete();
     }
+
+    @Override
+    public Task<Void> rateUser(String uid, double rating) {
+        return database.collection("users").document(uid).update("rating", rating);
+    }
+
+    @Override
+    public Task<Void> removeProjectOwned(User currentUser, final String uid) {
+        final DocumentReference reference = database.collection("users").document(currentUser.getUID());
+        return reference.get().continueWithTask(new Continuation<DocumentSnapshot, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<DocumentSnapshot> task) throws Exception {
+                if(task.isSuccessful()){
+                    Map<String, Object> data = task.getResult().getData();
+                    data.remove(uid);
+                    return reference.update("projectsOwned", data.get("projectsOwned"));
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
+    }
+
 }
