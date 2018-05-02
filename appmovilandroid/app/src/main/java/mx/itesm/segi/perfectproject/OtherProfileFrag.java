@@ -1,6 +1,7 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -61,7 +62,12 @@ public class OtherProfileFrag extends Fragment {
         tvEmail = getActivity().findViewById(R.id.tvEmail);
         tvSkills = getActivity().findViewById(R.id.tvSkills);
 
-        ivProfile.setImageBitmap(user.getProfPic());
+        user.setImageListener(new ImageListener() {
+            @Override
+            public void onImageAvailable(Bitmap image) {
+                ivProfile.setImageBitmap(image);
+            }
+        });
         tvName.setText(user.getName());
         tvCompany.setText(user.getCompany());
         rateNum.setText(user.getRating() + "");

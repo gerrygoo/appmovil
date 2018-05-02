@@ -216,6 +216,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
         Fragment newProject = new CreateProject();
         Bundle arguments = new Bundle();
         arguments.putBoolean(CreateProject.ARG_EDITING, false);
+        newProject.setArguments(arguments);
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, newProject).commit();
         activeFragments = new Fragment[]{newProject};
     }

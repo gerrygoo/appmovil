@@ -63,7 +63,12 @@ public class User implements Parcelable{
         Name = (String) map.get("name");
         Company = (String) map.get("company");
         Skills = (ArrayList<String>) map.get("skills");
-        Rating = (Double)map.get("rating");
+
+        if(map.get("rating") instanceof Double) {
+            Rating = (Double) map.get("rating");
+        } else {
+            Rating = 4.0;
+        }
         ProjectsMember = (ArrayList<String>) map.get("projectsMember");
         ProjectsOwned = (ArrayList<String>) map.get("projectsOwned");
         ReviewedProjects = (HashMap<String, Boolean>) map.get("reviewedProjects");
@@ -339,6 +344,13 @@ public class User implements Parcelable{
 
         parcel.writeDouble(Rating);
         parcel.writeByte((byte) (Premium ? 1 : 0));
+    }
+
+    public void setImageListener(ImageListener imageListener) {
+        this.imageListener = imageListener;
+        if(finishLoadingImage){
+            imageListener.onImageAvailable(ProfileImage);
+        }
     }
 
     private class DownloadImageFromURL extends AsyncTask<String, Void, Bitmap> {

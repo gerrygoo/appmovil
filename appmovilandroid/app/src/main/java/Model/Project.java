@@ -300,7 +300,7 @@ public class Project implements Parcelable{
     }
 
     public void removeApplicant(User applicant) {
-        Applicants.remove(applicant);
+        Applicants.remove(applicant.getUID());
     }
 
     public ArrayList<String> getTeam() {
@@ -320,7 +320,7 @@ public class Project implements Parcelable{
     }
 
     public void removeTeamMember(User user){
-        this.Team.remove(user);
+        this.Team.remove(user.getUID());
     }
 
     public String getOwnerUID() {
