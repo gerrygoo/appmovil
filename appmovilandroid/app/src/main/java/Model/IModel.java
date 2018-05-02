@@ -21,7 +21,7 @@ public interface IModel {
     Task<ArrayList<User>> getTeam(String projectUID);
 
     void reviewProject(Project project, boolean accept);
-    void createProject(Project project) throws Errors.CreateProjectException;
+    Task<Void> createProject(Project project) throws Errors.CreateProjectException;
     void reviewApplicant(Project project, User applicant, boolean accept);
 
     Task<Boolean> authenticate(String username, String password) throws Errors.AuthException;

@@ -139,81 +139,27 @@ class FirebaseStore implements IAsyncStore {
     @Override
     public Task<Void> createProject(final Project project) throws Errors.CreateProjectException {
 
-        final TaskCompletionSource<String> taskCompletionSource = new TaskCompletionSource<>();
-        Task<String> upload = taskCompletionSource.getTask();
+        return database.collection("projects").add(project.toMap()).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<DocumentReference, String>() {
 
-        if(project.getImageUrl() == null || project.getImageUrl().isEmpty()) {
-            if(project.getImage() == null){
-                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
-                taskCompletionSource.setResult(url);
-            }else {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                project.getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                Uri url = null;
-                try {
-                    FirebaseStorage.getInstance().getReference().child("images/" + project.getUID() + ".jpg").putBytes(stream.toByteArray()).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<String>>() {
-                        @Override
-                        public Task<String> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if(task.isSuccessful()){
-                                taskCompletionSource.setResult(task.getResult().getDownloadUrl().toString());
-                            }
-                            else {
-                                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
-                                taskCompletionSource.setResult(url);
-                            }
-                            return taskCompletionSource.getTask();
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
+            @Override
+            public String then(@NonNull Task<DocumentReference> task) throws Exception {
+                if (task.isSuccessful()) {
+                    return task.getResult().getId();
+                } else {
+                    throw task.getException();
                 }
             }
-        }
-
-        if(project.getUID() == null) {
-            return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
-                @Override
-                public Task<Void> then(@NonNull Task<String> task) throws Exception {
-                    if (task.isSuccessful()) {
-                        project.setImageUrl(task.getResult());
-                        return database.collection("projects").add(project.toMap()).continueWith(new Continuation<DocumentReference, Void>() {
-                            @Override
-                            public Void then(@NonNull Task<DocumentReference> task) throws Exception {
-                                if (task.isSuccessful()) {
-                                    project.setUID(task.getResult().getId());
-                                    return null;
-                                } else {
-                                    throw task.getException();
-                                }
-                            }
-                        });
-                    } else {
-                        throw task.getException();
-                    }
+        }).continueWithTask(new Continuation<String, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<String> task) throws Exception {
+                if (task.isSuccessful()) {
+                    project.setUID(task.getResult());
+                    return updateProject(project);
+                } else {
+                    throw task.getException();
                 }
-            });
-        } else {
-            return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
-                @Override
-                public Task<Void> then(@NonNull Task<String> task) throws Exception {
-                    if (task.isSuccessful()) {
-                        project.setImageUrl(task.getResult());
-                        return database.collection("projects").document(project.getUID()).set(project.toMap()).continueWith(new Continuation<Void, Void>() {
-                            @Override
-                            public Void then(@NonNull Task<Void> task) throws Exception {
-                                if (task.isSuccessful()) {
-                                    return null;
-                                } else {
-                                    throw task.getException();
-                                }
-                            }
-                        });
-                    } else {
-                        throw task.getException();
-                    }
-                }
-            });
-        }
+            }
+        });
     }
 
     @Override
@@ -268,13 +214,57 @@ class FirebaseStore implements IAsyncStore {
     }
 
     @Override
-    public Task<Void> updateProject(Project project){
-        try {
-            return createProject(project);
-        } catch (Errors.CreateProjectException e) {
-            e.printStackTrace();
-            return null;
+    public Task<Void> updateProject(final Project project){
+        final TaskCompletionSource<String> taskCompletionSource = new TaskCompletionSource<>();
+        Task<String> upload = taskCompletionSource.getTask();
+
+        if(project.getImageUrl() == null || project.getImageUrl().isEmpty()) {
+            if(project.getImage() == null){
+                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
+                taskCompletionSource.setResult(url);
+            }else {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                project.getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                Uri url = null;
+                try {
+                    FirebaseStorage.getInstance().getReference().child("images/" + project.getUID() + ".jpg").putBytes(stream.toByteArray()).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<String>>() {
+                        @Override
+                        public Task<String> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if(task.isSuccessful()){
+                                taskCompletionSource.setResult(task.getResult().getDownloadUrl().toString());
+                            }
+                            else {
+                                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
+                                taskCompletionSource.setResult(url);
+                            }
+                            return taskCompletionSource.getTask();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
+        return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<String> task) throws Exception {
+                if (task.isSuccessful()) {
+                    project.setImageUrl(task.getResult());
+                    return database.collection("projects").document(project.getUID()).set(project.toMap()).continueWith(new Continuation<Void, Void>() {
+                        @Override
+                        public Void then(@NonNull Task<Void> task) throws Exception {
+                            if (task.isSuccessful()) {
+                                return null;
+                            } else {
+                                throw task.getException();
+                            }
+                        }
+                    });
+                } else {
+                    throw task.getException();
+                }
+            }
+        });
     }
 
     private Task<User> createUser(final User user){

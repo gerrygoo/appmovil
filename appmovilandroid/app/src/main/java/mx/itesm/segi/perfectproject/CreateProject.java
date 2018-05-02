@@ -1,5 +1,6 @@
 package mx.itesm.segi.perfectproject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.icu.util.Calendar;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -24,6 +26,8 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import com.google.android.gms.tasks.Tasks;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -32,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import Model.Errors;
 import Model.Model;
@@ -170,6 +175,7 @@ public class CreateProject extends Fragment {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public void create(View v) throws ParseException {
         if (Title.length() == 0) {
             Snackbar.make(v, "Insert title", Snackbar.LENGTH_LONG).show();
@@ -189,7 +195,7 @@ public class CreateProject extends Fragment {
             ArrayList positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
-            Project project = new Project(
+            final Project project = new Project(
                     null,
                     Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),
@@ -201,19 +207,31 @@ public class CreateProject extends Fragment {
                     End
             );
             Log.i("Exito", project.toString());
-            try {
-                Model.getInstance().createProject(project);
-                Title.setText("");
-                Logo.setBackground(getResources().getDrawable(android.R.drawable.btn_default));
-                ImageUrl="";
-                StartDate.setText("");
-                EndDate.setText("");
-                Positions.setText("");
-                Location.setText("");
-                Description.setText("");
-            } catch (Errors.CreateProjectException exception) {
-                Snackbar.make(v, exception.getMessage(), Snackbar.LENGTH_LONG).show();
-            }
+            new AsyncTask<Void, Void, Void>(){
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    try {
+                        Tasks.await(Model.getInstance().createProject(project));
+
+                    } catch (ExecutionException | InterruptedException | Errors.CreateProjectException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    Title.setText("");
+                    Logo.setBackground(getResources().getDrawable(android.R.drawable.btn_default));
+                    ImageUrl="";
+                    StartDate.setText("");
+                    EndDate.setText("");
+                    Positions.setText("");
+                    Location.setText("");
+                    Description.setText("");
+                }
+            }.execute();
         }
     }
 

@@ -73,6 +73,10 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
         this.notifications = notifications;
     }
 
+    public void setProjects(ArrayList<Project> projects){
+        this.projects = projects;
+    }
+
     @Override
     public int getItemCount() {
         return projects.size();

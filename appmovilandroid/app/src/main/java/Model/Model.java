@@ -1,9 +1,6 @@
 package Model;
 
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -188,10 +185,22 @@ public class Model implements IModel {
     }
 
     @Override
-    public void createProject(Project project) throws Errors.CreateProjectException {
-        Store.createProject(project);
-        currentUser.addProjectOwned(project);
-        Store.updateUser(currentUser);
+    public Task<Void> createProject(final Project project) throws Errors.CreateProjectException {
+        return Store.createProject(project).continueWith(new Continuation<Void, Void>() {
+            @Override
+            public Void then(@NonNull Task<Void> task) throws Exception {
+                currentUser.addProjectOwned(project);
+                return null;
+            }
+        }).continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(@NonNull Task<Void> task) throws Exception {
+                Store.updateUser(currentUser);
+                TaskCompletionSource taskCompletionSource = new TaskCompletionSource();
+                taskCompletionSource.setResult(null);
+                return taskCompletionSource.getTask();
+            }
+        });
     }
 
     @Override

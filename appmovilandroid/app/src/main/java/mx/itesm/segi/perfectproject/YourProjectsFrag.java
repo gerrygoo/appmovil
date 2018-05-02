@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,6 +94,7 @@ public class YourProjectsFrag extends Fragment {
     private void loadProjects() {
         this.user = getArguments().getParcelable(ARG_USER);
         this.owned = getArguments().getBoolean(ARG_OWNED);
+        final AdapterRV adapterRV = new AdapterRV(new ArrayList<Project>(), owned, listener);
 
         new AsyncTask<Void, Void, Pair<ArrayList<Project>, HashMap<Project, Boolean>>>(){
             @Override
@@ -100,6 +102,7 @@ public class YourProjectsFrag extends Fragment {
                 try {
                     if(owned) {
                         ArrayList<Project> projects = Tasks.await(Model.getInstance().getOwnedProjects());
+                        Log.e("Lengths", "" + Model.getInstance().getCurrentUser().getProjectsOwned() + "" + projects.size() +"");
                         return new Pair<>(projects, null);
                     } else {
                         ArrayList<Project> projects = Tasks.await(Model.getInstance().getMyProjects());
@@ -115,15 +118,18 @@ public class YourProjectsFrag extends Fragment {
             @Override
             protected void onPostExecute(Pair<ArrayList<Project>, HashMap<Project, Boolean>> pair) {
                 if(owned){
-                    AdapterRV adapterRV = new AdapterRV(pair.first, true, listener);
-                    rvYourProjects.setAdapter(adapterRV);
+                    adapterRV.setProjects(pair.first);
+                    adapterRV.notifyDataSetChanged();
                 } else {
-                    AdapterRV adapterRV = new AdapterRV(pair.first, false, listener);
+                    adapterRV.setProjects(pair.first);
                     adapterRV.setNotifications(pair.second);
-                    rvYourProjects.setAdapter(adapterRV);
+                    adapterRV.notifyDataSetChanged();
                 }
+                projects = pair.first;
+                Log.e("Fetched", "true" + pair.first.size());
             }
         }.execute();
+        rvYourProjects.setAdapter(adapterRV);
     }
 
     private void renderProject(int position) {

@@ -17,10 +17,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import Model.Errors;
 import Model.Model;
+import Model.Project;
 
 public class Login extends AppCompatActivity {
 
