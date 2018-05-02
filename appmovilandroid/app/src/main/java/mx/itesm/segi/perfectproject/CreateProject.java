@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +54,7 @@ import Model.Project;
  */
 public class CreateProject extends Fragment {
     public static final String ARG_PROJECT = "Project";
+    public static final String ARG_EDITING = "Editing";
 
     //Model
     private Project project;
@@ -145,6 +147,16 @@ public class CreateProject extends Fragment {
             }
         });
 
+        try{
+            if(getArguments().getBoolean(ARG_EDITING) == true)
+            {
+                project = getArguments().getParcelable(ARG_PROJECT);
+                editProject();
+            }
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         return result;
     }
 
@@ -176,6 +188,100 @@ public class CreateProject extends Fragment {
     }
 
     @SuppressLint("StaticFieldLeak")
+    public void editProject()
+    {
+        Title.setText(project.getTitle());
+        BMimage = project.getImage();
+        Drawable d = new BitmapDrawable(getResources(), BMimage);
+        Logo.setBackground(d);
+        ImageUrl=" ";
+        StartDate.setText(android.text.format.DateFormat.format("dd/MM/yyyy", project.getStartDate()));
+        EndDate.setText(android.text.format.DateFormat.format("dd/MM/yyyy", project.getEndDate()));
+        ArrayList<String> positions = project.getPositions();
+        String positionsText = "";
+        for(int i = 0; i < positions.size(); i++)
+        {
+            positionsText += positions.get(i);
+            if(i!=positions.size()-1) positionsText += " ";
+        }
+        Positions.setText(positionsText);
+        Location.setText(project.getLocation());
+        Description.setText(project.getDescription());
+        Create.setText("Guardar");
+        Create.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    save(view);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void save(View v) throws ParseException {
+        if (Title.length() == 0) {
+            Snackbar.make(v, "Insert title", Snackbar.LENGTH_LONG).show();
+        } else if (ImageUrl.length() == 0) {
+            Snackbar.make(v, "Insert logo", Snackbar.LENGTH_LONG).show();
+        } else if (StartDate.length() == 0) {
+            Snackbar.make(v, "Insert start date", Snackbar.LENGTH_LONG).show();
+        } else if (EndDate.length() == 0) {
+            Snackbar.make(v, "Insert end date", Snackbar.LENGTH_LONG).show();
+        } else if (Positions.length() == 0) {
+            Snackbar.make(v, "Insert positions", Snackbar.LENGTH_LONG).show();
+        } else if (Location.length() == 0) {
+            Snackbar.make(v, "Insert location", Snackbar.LENGTH_LONG).show();
+        } else if (Description.length() == 0) {
+            Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
+        } else {
+            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
+            Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
+            Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
+            project = new Project(
+                    project.getUID(),
+                    Model.getInstance().getCurrentUser(),
+                    Title.getText().toString(),
+                    BMimage,
+                    positions,
+                    Description.getText().toString(),
+                    Location.getText().toString(),
+                    Start,
+                    End
+            );
+            Log.i("Exito", project.toString());
+
+            new AsyncTask<Void, Void, Void>(){
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    try {
+                        Tasks.await(Model.getInstance().updateProject(project));
+
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    Fragment fragment = new ProjectInfoFrag();
+                    Bundle args = new Bundle();
+                    args.putParcelable(ProjectInfoFrag.ARG_PROJECT, project);
+                    args.putBoolean(ProjectInfoFrag.ARG_OWNED, true);
+                    fragment.setArguments(args);
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, fragment).addToBackStack(MainScreenActivity.BACK_STACK);
+                    transaction.commit();
+                }
+            }.execute();
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
     public void create(View v) throws ParseException {
         if (Title.length() == 0) {
             Snackbar.make(v, "Insert title", Snackbar.LENGTH_LONG).show();
@@ -192,10 +298,10 @@ public class CreateProject extends Fragment {
         } else if (Description.length() == 0) {
             Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
         } else {
-            ArrayList positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
+            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
-            final Project project = new Project(
+            project = new Project(
                     null,
                     Model.getInstance().getCurrentUser(),
                     Title.getText().toString(),

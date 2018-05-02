@@ -250,16 +250,7 @@ class FirebaseStore implements IAsyncStore {
             public Task<Void> then(@NonNull Task<String> task) throws Exception {
                 if (task.isSuccessful()) {
                     project.setImageUrl(task.getResult());
-                    return database.collection("projects").document(project.getUID()).set(project.toMap()).continueWith(new Continuation<Void, Void>() {
-                        @Override
-                        public Void then(@NonNull Task<Void> task) throws Exception {
-                            if (task.isSuccessful()) {
-                                return null;
-                            } else {
-                                throw task.getException();
-                            }
-                        }
-                    });
+                    return database.collection("projects").document(project.getUID()).set(project.toMap());
                 } else {
                     throw task.getException();
                 }
@@ -293,5 +284,10 @@ class FirebaseStore implements IAsyncStore {
                 }
             }
         });
+    }
+  
+    @Override
+    public Task<Void> deleteProject(Project project) {
+        return database.collection("projects").document(project.getUID()).delete();
     }
 }

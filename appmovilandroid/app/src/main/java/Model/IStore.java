@@ -23,6 +23,7 @@ interface IStore {
 
     void updateUser(User user);
     void updateProject(Project project);
+    void deleteProject(Project project);
 }
 
 interface IAsyncStore {
@@ -40,4 +41,5 @@ interface IAsyncStore {
 
     Task<Void> updateUser(User user);
     Task<Void> updateProject(Project project);
+    Task<Void> deleteProject(Project project);
 }

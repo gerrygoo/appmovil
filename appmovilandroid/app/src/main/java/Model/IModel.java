@@ -22,11 +22,15 @@ public interface IModel {
 
     void reviewProject(Project project, boolean accept);
     Task<Void> createProject(Project project) throws Errors.CreateProjectException;
+    Task<Void> updateProject(Project project);
+    void deleteProject(Project project);
     void reviewApplicant(Project project, User applicant, boolean accept);
 
     Task<Boolean> authenticate(String username, String password) throws Errors.AuthException;
     void logout();
     User getCurrentUser();
+    Task<Void> updateCurrentUser();
+    Task<User> getUserByID(String UID);
     void register(User user, String password) throws  Errors.RegisterException;
 
     Task<ArrayList<Project>> getOwnedProjects();

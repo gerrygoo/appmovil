@@ -8,7 +8,8 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_margin="8dp">
 
         <ImageView
             android:id="@+id/ivNew"
@@ -19,6 +20,7 @@
             app:srcCompat="@android:drawable/ic_notification_overlay" />
 
         <LinearLayout
+            android:id="@+id/project_card_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

@@ -1,13 +1,11 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
-    tools:context="mx.itesm.segi.perfectproject.ProfileFrag">
+    tools:context="mx.itesm.segi.perfectproject.OtherProfileFrag">
 
     <!-- TODO: Update blank fragment layout -->
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -32,19 +30,6 @@
                     android:layout_alignParentTop="true"
                     android:layout_weight="0.5"
                     android:src="@drawable/ic_account_circle_black_24dp" />
-
-                <ImageButton
-                    android:id="@+id/editProfilePic"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentEnd="true"
-                    android:adjustViewBounds="true"
-                    android:background="@android:color/transparent"
-                    android:scaleType="fitCenter"
-                    android:scaleX="0.6"
-                    android:scaleY="0.6"
-                    android:src="@android:drawable/ic_menu_edit" />
             </RelativeLayout>
 
             <LinearLayout
@@ -55,7 +40,7 @@
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:hint="@string/str_name">
 
@@ -71,7 +56,7 @@
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="@string/str_company">
 
@@ -80,7 +65,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:inputType="text" />
+                        android:editable="false"
+                        android:inputType="none" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -117,48 +103,44 @@
                 android:numStars="5" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/bPremium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp"
-            android:backgroundTint="@color/colorAccent"
-            android:text="Premium"
-            android:textAlignment="center" />
-
-        <Switch
-            android:id="@+id/sEmployer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:text="@string/str_employer"
-            android:textSize="20sp" />
-
-        <Button
-            android:id="@+id/btnAddSkill"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Add Skills"
-            android:textAlignment="center" />
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <LinearLayout
-                android:id="@+id/SkillsLayout"
+                android:id="@+id/otherProfileContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/tvEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="false"
+                        android:hint="@string/prompt_email" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/tvSkills"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:editable="false"
+                        android:hint="@string/str_Skills" />
+                </android.support.design.widget.TextInputLayout>
 
             </LinearLayout>
 
         </ScrollView>
 
     </LinearLayout>
+
 </FrameLayout>

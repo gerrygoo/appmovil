@@ -27,6 +27,7 @@ public class User implements Parcelable{
     private String Email;
     private String Name;
     private String Company;
+    private Bitmap ProfPic;
     private ArrayList<String> Skills; //Probably own class
     private ArrayList<String> ProjectsMember;
     private ArrayList<String> ProjectsOwned;
@@ -38,7 +39,7 @@ public class User implements Parcelable{
     private ImageListener imageListener;
     private Boolean finishLoadingImage;
 
-    private int Rating;
+    private float Rating;
     private boolean Premium;
 
     public User(String email, String name) {
@@ -47,7 +48,7 @@ public class User implements Parcelable{
 
         UID = "";
         Company = "";
-        Rating = -1;
+        Rating = 4;
         Premium = false;
         ProjectsMember = new ArrayList<>();
         ProjectsOwned = new ArrayList<>();
@@ -154,6 +155,11 @@ public class User implements Parcelable{
         }
     }
 
+    public void removeProjectMember(Project project)
+    {
+        ProjectsMember.remove(ProjectsMember.indexOf(project));
+    }
+
     public void addProjects(Project[] projects){
         for (Project p : projects) {
             ProjectsMember.add(p.getUID());
@@ -166,14 +172,23 @@ public class User implements Parcelable{
         }
     }
 
+    public void removeProjectOwned(Project project)
+    {
+        ProjectsOwned.remove(ProjectsOwned.indexOf(project));
+    }
+
     public void addProjectsOwned(Project[] projects){
         for (Project p : projects) {
             ProjectsOwned.add(p.getUID());
         }
     }
 
-    public void setSkills(ArrayList<String> skills){
-        this.Skills = skills;
+    public void setSkill(int key,String skill){
+        Skills.set(key, skill);
+    }
+
+    public void addSkill(String skill){
+       Skills.add(skill);
     }
 
     public String getUID() {
@@ -196,6 +211,18 @@ public class User implements Parcelable{
         return Company;
     }
 
+    public void setRating(float rating) {
+        Rating = rating;
+    }
+
+    public void setCompany(String company) {
+        Company = company;
+    }
+
+    public Bitmap getProfPic() {
+        return ProfPic;
+    }
+
     public ArrayList<String> getSkills() {
         return Skills;
     }
@@ -208,7 +235,7 @@ public class User implements Parcelable{
         return ProjectsOwned;
     }
 
-    public int getRating() {
+    public float getRating() {
         return Rating;
     }
 
@@ -256,8 +283,20 @@ public class User implements Parcelable{
 
     }
 
+    public void removeSkill(int index){
+        Skills.remove(index);
+    }
+
     protected void setReviewedProjects(HashMap<String, Boolean> reviewedProjects) {
         ReviewedProjects = reviewedProjects;
+    }
+
+    public void clearSkills(){
+        Skills.clear();
+    }
+
+    public void setProfPic(Bitmap profPic) {
+        ProfPic = profPic;
     }
 
     @Override
@@ -297,7 +336,7 @@ public class User implements Parcelable{
         }
         parcel.writeStringList(projects);
 
-        parcel.writeInt(Rating);
+        parcel.writeFloat(Rating);
         parcel.writeByte((byte) (Premium ? 1 : 0));
     }
 

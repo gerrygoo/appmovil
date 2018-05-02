@@ -9,7 +9,6 @@
     <string name="str_notification">Notification</string>
     <string name="str_ok">Ok</string>
     <string name="str_name">Name</string>
-    <string name="str_email">Email</string>
     <string name="str_abilities">Abilities</string>
     <string name="str_employer">Employer</string>
     <string name="str_curriculum">Curriculum</string>
@@ -46,4 +45,8 @@
     <string name="str_location">Location</string>
     <string name="str_description">Description</string>
     <string name="prompt_name">Complete name</string>
+    <string name="str_team_members">Team members</string>
+    <string name="str_Skills">Skills</string>
+    <string name="str_email">Email</string>
+    <string name="email_not_available">Email not available</string>
 </resources>

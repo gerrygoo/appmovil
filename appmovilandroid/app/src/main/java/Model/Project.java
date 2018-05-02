@@ -157,6 +157,38 @@ public class Project implements Parcelable{
         parcel.writeLong(EndDate.getTime());
     }
 
+    public void setTitle(String title) {
+        Title = title;
+    }
+
+    public void setImage(Bitmap image) {
+        Image = image;
+    }
+
+    public void setPositions(ArrayList<String> positions) {
+        Positions = positions;
+    }
+
+    public void setDescription(String description) {
+        Description = description;
+    }
+
+    public void setLocation(String location) {
+        Location = location;
+    }
+
+    public void setStartDate(Date startDate) {
+        StartDate = startDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        EndDate = endDate;
+    }
+
+    public void setFinishLoadingImage(Boolean finishLoadingImage) {
+        this.finishLoadingImage = finishLoadingImage;
+    }
+
     private class DownloadImageFromURL extends AsyncTask<String, Void, Bitmap>{
 
         @Override

@@ -87,6 +87,24 @@ public class YourProjectsFrag extends Fragment {
             public void clearNew(int position) {
                 Model.getInstance().viewNotification(projects.get(position));
             }
+
+            @Override
+            public void reloadYourProjects() {
+                loadProjects();
+            }
+
+            @Override
+            public void loadProfile(User user) {
+                    Fragment profile = new OtherProfileFrag();
+                    Bundle argsProfile = new Bundle();
+
+                    argsProfile.putParcelable(OtherProfileFrag.ARG_USER, user);
+                    argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, false);
+
+                    profile.setArguments(argsProfile);
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).addToBackStack(MainScreenActivity.BACK_STACK);
+                    transaction.commit();
+            }
         };
     }
 
@@ -133,7 +151,11 @@ public class YourProjectsFrag extends Fragment {
     }
 
     private void renderProject(int position) {
-        Fragment fragment = MainScreenActivity.projectToCard(projects.get(position));
+        Fragment fragment = new ProjectInfoFrag();
+        Bundle args = new Bundle();
+        args.putParcelable(ProjectInfoFrag.ARG_PROJECT, projects.get(position));
+        args.putBoolean(ProjectInfoFrag.ARG_OWNED, owned);
+        fragment.setArguments(args);
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, fragment).addToBackStack(MainScreenActivity.BACK_STACK);
         transaction.commit();
     }
@@ -141,6 +163,8 @@ public class YourProjectsFrag extends Fragment {
     static interface Listener{
         void itemClicked(long id);
         void clearNew(int position);
+        void reloadYourProjects();
+        void loadProfile(User user);
     }
 
     @Override

@@ -66,24 +66,17 @@ public class Model implements IModel {
 
     @Override
     public Task<ArrayList<User>> getApplicants(final String projectUID) {
-        final TaskCompletionSource<ArrayList<User>> taskCompletionSource = new TaskCompletionSource<>();
-
-        Store.getProject(projectUID).addOnCompleteListener(new OnCompleteListener<Project>() {
+        return Store.getProject(projectUID).continueWithTask(new Continuation<Project, Task<ArrayList<User>>>() {
             @Override
-            public void onComplete(@NonNull Task<Project> task) {
+            public Task<ArrayList<User>> then(@NonNull Task<Project> task) throws Exception {
                 if(task.isSuccessful()){
-                    try {
-                        ArrayList<String> ids = Tasks.await(Store.getProject(projectUID)).getApplicants();
-                        Tasks.await(Store.getUsers(ids));
-                    } catch (ExecutionException | InterruptedException e) {
-                        taskCompletionSource.setException(e);
-                    }
+                    ArrayList<String> ids = task.getResult().getApplicants();
+                    return Store.getUsers(ids);
                 } else {
-                    taskCompletionSource.setException(task.getException());
+                    throw task.getException();
                 }
             }
         });
-        return taskCompletionSource.getTask();
     }
 
     @Override
@@ -132,6 +125,16 @@ public class Model implements IModel {
     @Override
     public User getCurrentUser() {
         return currentUser;
+    }
+
+    @Override
+    public Task<Void> updateCurrentUser() {
+        return Store.updateUser(currentUser);
+    }
+
+    @Override
+    public Task<User> getUserByID(String uid) {
+        return Store.getUser(uid);
     }
 
     // TODO
@@ -204,10 +207,42 @@ public class Model implements IModel {
     }
 
     @Override
-    public void reviewProject(Project project, boolean accept) {
+    public Task<Void> updateProject(Project project) {
+        return Store.updateProject(project);
+    }
+
+    @Override
+    public void reviewProject(final Project project, boolean accept) {
         currentUser.reviewProject(project, accept);
-        Store.updateUser(currentUser);
-        project.addApplicant(currentUser);
-        Store.updateProject(project);
+        if(accept) {
+            project.addApplicant(currentUser);
+        }
+        Store.updateUser(currentUser).continueWith(new Continuation<Void, Void>() {
+            @Override
+            public Void then(@NonNull Task<Void> task) throws Exception {
+                Tasks.await(Store.updateProject(project));
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public void deleteProject(final Project project)
+    {
+        ArrayList<String> membersIds = project.getTeam();
+        Store.getUsers(membersIds).continueWith(new Continuation<ArrayList<User>, Void>() {
+
+            @Override
+            public Void then(@NonNull Task<ArrayList<User>> task) throws Exception {
+                ArrayList<User> members = task.getResult();
+                for(int i = 0;i < members.size();i++)
+                {
+                    members.get(i).removeProjectMember(project);
+                    Tasks.await(Store.updateUser(members.get(i)));
+                }
+                Tasks.await(Store.deleteProject(project));
+                return null;
+            }
+        });
     }
 }
