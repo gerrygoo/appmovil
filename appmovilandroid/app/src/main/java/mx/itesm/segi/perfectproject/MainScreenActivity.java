@@ -21,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -123,6 +124,8 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
                 findViewById(R.id.fragmentPlacer),
                 findViewById(R.id.fragmentPlacerDraggable),
         };
+
+        final ProgressBar bar = findViewById(R.id.mainProgress);
 
         renderBrowse();
 

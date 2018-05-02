@@ -1,6 +1,7 @@
 package mx.itesm.segi.perfectproject;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -11,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.Tasks;
@@ -49,6 +51,8 @@ public class Login extends AppCompatActivity {
             }
         });
 
+        final ProgressBar bar = findViewById(R.id.loginProgress);
+
         findViewById(R.id.forgot).setOnClickListener(new View.OnClickListener() {
             @SuppressLint("StaticFieldLeak")
             @Override
@@ -57,6 +61,7 @@ public class Login extends AppCompatActivity {
                 if(email.isEmpty()){
                     errorText.setText("Please add an email");
                 } else {
+                    bar.setVisibility(View.VISIBLE);
                     new AsyncTask<Void, Void, Pair<Boolean, String>>(){
                         @Override
                         protected Pair<Boolean, String> doInBackground(Void... voids) {
@@ -76,6 +81,7 @@ public class Login extends AppCompatActivity {
                                 errorText.setTextColor(Color.RED);
                             }
                             errorText.setText(pair.second);
+                            bar.setVisibility(View.INVISIBLE);
                         }
                     }.execute();
                 }
@@ -87,6 +93,9 @@ public class Login extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     private void authenticate(final String email, final String password){
         final Context context = this;
+
+        final ProgressBar bar = findViewById(R.id.loginProgress);
+        bar.setVisibility(View.VISIBLE);
 
         new AsyncTask<Void, Void, Boolean>(){
             @Override
@@ -109,6 +118,7 @@ public class Login extends AppCompatActivity {
                     errorText.setTextColor(Color.RED);
                     errorText.setText("Given credentials failed to authenticate.");
                 }
+                bar.setVisibility(View.INVISIBLE);
             }
         }.execute();
 

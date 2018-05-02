@@ -66,7 +66,7 @@ public class Project implements Parcelable{
         UID = uid;
         OwnerUID = owner.getUID();
         Title = title;
-        Image = image;
+        Image = Utils.bitmapToThumbnail(image);
         Positions = positions;
         Description = description;
         Location = location;
@@ -163,7 +163,7 @@ public class Project implements Parcelable{
     }
 
     public void setImage(Bitmap image) {
-        Image = image;
+        Image = Utils.bitmapToThumbnail(image);
     }
 
     public void setPositions(ArrayList<String> positions) {
@@ -199,24 +199,11 @@ public class Project implements Parcelable{
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            Image = bitmap;
-            finishLoadingImage = true;
-            if(imageListener != null){
-                imageListener.onImageAvailable(bitmap);
+            if(bitmap == null) {
+                Image = bitmap;
+            } else {
+                Image = Utils.bitmapToThumbnail(bitmap);
             }
-        }
-    }
-
-    private class DownloadImageFromIS extends AsyncTask<InputStream, Void, Bitmap>{
-
-        @Override
-        protected Bitmap doInBackground(InputStream... inputStreams) {
-            return getBitmapFromIS(inputStreams[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            Image = bitmap;
             finishLoadingImage = true;
             if(imageListener != null){
                 imageListener.onImageAvailable(bitmap);

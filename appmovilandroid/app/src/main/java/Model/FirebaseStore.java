@@ -209,7 +209,7 @@ class FirebaseStore implements IAsyncStore {
     public Task<Void> updateUser(final User user) {
 
         Map<String, Object> newUser = user.toMap();
-        
+
         newUser.remove("projectsMember");
         newUser.remove("review");
 

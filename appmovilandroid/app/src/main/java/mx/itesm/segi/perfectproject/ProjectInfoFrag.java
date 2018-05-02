@@ -3,6 +3,7 @@ package mx.itesm.segi.perfectproject;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.Tasks;
@@ -70,6 +72,9 @@ public class ProjectInfoFrag extends Fragment {
     public void onStart() {
         super.onStart();
 
+        final ProgressBar bar = getActivity().findViewById(R.id.mainProgress);
+        bar.setVisibility(View.VISIBLE);
+
         new AsyncTask<Void, Void, Pair<User, ArrayList<User>>>(){
 
             @Override
@@ -88,6 +93,7 @@ public class ProjectInfoFrag extends Fragment {
             @Override
             protected void onPostExecute(Pair<User, ArrayList<User>> pair) {
                 loadProject(pair.first, pair.second);
+                bar.setVisibility(View.INVISIBLE);
             }
         }.execute();
     }

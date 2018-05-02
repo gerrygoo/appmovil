@@ -2,6 +2,7 @@ package mx.itesm.segi.perfectproject;
 
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -17,6 +18,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -113,7 +115,13 @@ public class YourProjectsFrag extends Fragment {
     private void loadProjects() {
         this.user = getArguments().getParcelable(ARG_USER);
         this.owned = getArguments().getBoolean(ARG_OWNED);
-        final AdapterRV adapterRV = new AdapterRV(new ArrayList<Project>(), owned, listener);
+
+
+        final ProgressBar bar = getActivity().findViewById(R.id.mainProgress);
+
+        final AdapterRV adapterRV = new AdapterRV(new ArrayList<Project>(), owned, listener, bar);
+
+        bar.setVisibility(View.VISIBLE);
 
         new AsyncTask<Void, Void, ArrayList<Project>>(){
             @Override
@@ -145,6 +153,8 @@ public class YourProjectsFrag extends Fragment {
                 }
                 projects = param;
                 Log.e("Fetched", "true" + param.size());
+
+                bar.setVisibility(View.INVISIBLE);
             }
         }.execute();
         rvYourProjects.setAdapter(adapterRV);
