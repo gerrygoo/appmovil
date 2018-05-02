@@ -149,7 +149,8 @@ public class ProjectInfoFrag extends Fragment {
                     argEditProject.putParcelable(ARG_PROJECT, project);
 
                     editProject.setArguments(argEditProject);
-                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, editProject).commit();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, editProject).addToBackStack(MainScreenActivity.BACK_STACK);
+                    transaction.commit();
                 }
             });
 
