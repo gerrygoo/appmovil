@@ -139,6 +139,7 @@ public class Model implements IModel {
         if(user == null || password.isEmpty()){
             throw new Errors.RegisterException("Missing user or password", Errors.RegisterError.MissingItem);
         }
+        Log.e("null", user.ReviewedProjects == null ? "Yes" : "No");
         Store.register(user,password);
     }
 

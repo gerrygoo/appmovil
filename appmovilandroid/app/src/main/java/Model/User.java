@@ -30,7 +30,7 @@ public class User implements Parcelable{
     private ArrayList<String> Skills; //Probably own class
     private ArrayList<String> ProjectsMember;
     private ArrayList<String> ProjectsOwned;
-    private HashMap<String, Boolean> ReviewedProjects;
+    protected HashMap<String, Boolean> ReviewedProjects;
     private HashMap<String, Boolean> Notifications;
     private String ProfileImageURL;
     private Bitmap ProfileImage;
@@ -78,6 +78,9 @@ public class User implements Parcelable{
         if(!ProfileImageURL.isEmpty()) {
             finishLoadingImage = false;
             new DownloadImageFromURL().execute(ProfileImageURL);
+        }
+        if(ReviewedProjects == null){
+            ReviewedProjects = new HashMap<>();
         }
     }
 
