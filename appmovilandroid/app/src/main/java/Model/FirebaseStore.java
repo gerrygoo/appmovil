@@ -237,7 +237,7 @@ class FirebaseStore implements IAsyncStore {
                                 taskCompletionSource.setResult(task.getResult().getDownloadUrl().toString());
                             }
                             else {
-                                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
+                                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=5876e60f-1561-4431-8a0a-8fab5d4bd4cf";
                                 taskCompletionSource.setResult(url);
                             }
                             return taskCompletionSource.getTask();
@@ -266,7 +266,7 @@ class FirebaseStore implements IAsyncStore {
     private Task<User> createUser(final User user){
         if(user.getProfileImageURL() == null || user.getProfileImageURL().isEmpty()) {
             if(user.getProfileImage() == null){
-                user.setProfileImageURL("https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3");
+                user.setProfileImageURL("https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=5876e60f-1561-4431-8a0a-8fab5d4bd4cf");
             } else {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 user.getProfileImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
