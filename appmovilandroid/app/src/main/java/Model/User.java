@@ -245,6 +245,10 @@ public class User implements Parcelable{
         return ProjectsMember;
     }
 
+    public void setProjectsMember(ArrayList<String> projects) {
+        this.ProjectsMember = projects;
+    }
+
     public ArrayList<String> getProjectsOwned() {
         return ProjectsOwned;
     }

@@ -225,7 +225,29 @@ public class ProfileFrag extends Fragment {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void loadProfileInfo(View v) {
+
+        final Double[] rating = {0.0};
+        new AsyncTask<Void, Void, Void>(){
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    rating[0] = Tasks.await(Model.getInstance().getRating(user.getUID())) ;
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                user.setRating(rating[0]);
+            }
+
+        }.execute();
+
         user = getArguments().getParcelable(ARG_USER);
         ivProfile.setImageBitmap(user.getProfileImage());
         tvCompany.setText(user.getCompany());

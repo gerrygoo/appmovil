@@ -41,26 +41,26 @@ class FirebaseStore implements IAsyncStore {
         return database.collection("users").document(uid).get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<DocumentSnapshot, User>() {
             @Override
             public User then(@NonNull Task<DocumentSnapshot> task) throws Exception {
-                if(task.isSuccessful()){
-                    DocumentSnapshot document = task.getResult();
-                    if(document.exists()) {
-                        Map<String, Object> map = document.getData();
-                        if(map.get("projectsMember") == null) {
-                            map.put("projectsMember", new ArrayList<>());
-                        } else {
-                            Map<String, Object> projects = (Map<String, Object>) document.getData().get("projectsMember");
-                            String[] keys = new String[projects.keySet().size()];
-                            projects.keySet().toArray(keys);
-                            map.put("projectsMember", new ArrayList<>(Arrays.asList(keys)));
-                        }
-                        User result = new User(map, document.getId());
-                        return result;
+            if(task.isSuccessful()){
+                DocumentSnapshot document = task.getResult();
+                if(document.exists()) {
+                    Map<String, Object> map = document.getData();
+                    if(map.get("projectsMember") == null) {
+                        map.put("projectsMember", new ArrayList<>());
                     } else {
-                        return null;
+                        Map<String, Object> projects = (Map<String, Object>) document.getData().get("projectsMember");
+                        String[] keys = new String[projects.keySet().size()];
+                        projects.keySet().toArray(keys);
+                        map.put("projectsMember", new ArrayList<>(Arrays.asList(keys)));
                     }
+                    User result = new User(map, document.getId());
+                    return result;
                 } else {
                     return null;
                 }
+            } else {
+                return null;
+            }
             }
         });
     }
@@ -72,27 +72,27 @@ class FirebaseStore implements IAsyncStore {
         return database.collection("users").get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR ,new Continuation<QuerySnapshot, ArrayList<User>>() {
             @Override
             public ArrayList<User> then(@NonNull Task<QuerySnapshot> task) throws Exception {
-                if(task.isSuccessful()){
-                    QuerySnapshot documents = task.getResult();
-                    ArrayList<User> result = new ArrayList<>();
-                    for (DocumentSnapshot doc: documents){
-                        if(ids.contains(doc.getId())) {
-                            Map<String, Object> map = doc.getData();
-                            if (map.get("projectsMember") == null) {
-                                map.put("projectsMember", new ArrayList<>());
-                            } else {
-                                Map<String, Object> projects = (Map<String, Object>) doc.getData().get("projectsMember");
-                                String[] keys = new String[projects.keySet().size()];
-                                projects.keySet().toArray(keys);
-                                map.put("projectsMember", new ArrayList<String>(Arrays.asList(keys)));
-                            }
-                            result.add(new User(map, doc.getId()));
+            if(task.isSuccessful()){
+                QuerySnapshot documents = task.getResult();
+                ArrayList<User> result = new ArrayList<>();
+                for (DocumentSnapshot doc: documents){
+                    if(ids.contains(doc.getId())) {
+                        Map<String, Object> map = doc.getData();
+                        if (map.get("projectsMember") == null) {
+                            map.put("projectsMember", new ArrayList<>());
+                        } else {
+                            Map<String, Object> projects = (Map<String, Object>) doc.getData().get("projectsMember");
+                            String[] keys = new String[projects.keySet().size()];
+                            projects.keySet().toArray(keys);
+                            map.put("projectsMember", new ArrayList<String>(Arrays.asList(keys)));
                         }
+                        result.add(new User(map, doc.getId()));
                     }
-                    return result;
-                } else {
-                    throw task.getException();
                 }
+                return result;
+            } else {
+                throw task.getException();
+            }
             }
         });
     }
@@ -102,17 +102,17 @@ class FirebaseStore implements IAsyncStore {
         return database.collection("projects").get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<QuerySnapshot, ArrayList<String>>() {
             @Override
             public ArrayList<String> then(@NonNull Task<QuerySnapshot> task) throws Exception {
-                if(task.isSuccessful()){
-                    QuerySnapshot documents = task.getResult();
-                    ArrayList<String> result = new ArrayList<>();
-                    for (DocumentSnapshot doc: documents.getDocuments()) {
-                        String current = doc.getId();
-                        result.add(current);
-                    }
-                    return result;
-                } else {
-                    throw task.getException();
+            if(task.isSuccessful()){
+                QuerySnapshot documents = task.getResult();
+                ArrayList<String> result = new ArrayList<>();
+                for (DocumentSnapshot doc: documents.getDocuments()) {
+                    String current = doc.getId();
+                    result.add(current);
                 }
+                return result;
+            } else {
+                throw task.getException();
+            }
             }
         });
     }
@@ -122,12 +122,12 @@ class FirebaseStore implements IAsyncStore {
         return database.collection("projects").document(uid).get().continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<DocumentSnapshot, Project>() {
             @Override
             public Project then(@NonNull Task<DocumentSnapshot> task) throws Exception {
-                if(task.isSuccessful()){
-                    DocumentSnapshot document = task.getResult();
-                    return new Project(document.getData(), document.getId());
-                } else {
-                    throw task.getException();
-                }
+            if(task.isSuccessful()){
+                DocumentSnapshot document = task.getResult();
+                return new Project(document.getData(), document.getId());
+            } else {
+                throw task.getException();
+            }
             }
         });
 
@@ -157,27 +157,55 @@ class FirebaseStore implements IAsyncStore {
     }
 
     @Override
+    public Task<ArrayList<String>> getMemberedProjects(String uid) {
+        return database.collection("users").document(uid).get()
+        .continueWith(
+            AsyncTask.THREAD_POOL_EXECUTOR,
+            new Continuation<DocumentSnapshot, ArrayList<String>>() {
+                @Override
+                public ArrayList<String> then(@NonNull Task<DocumentSnapshot> task) throws Exception {
+                    if(task.isSuccessful()){
+                        DocumentSnapshot document = task.getResult();
+                        if(document.exists()) {
+                            Map<String, Object> map = document.getData();
+                            if (map.get("projectsMember") != null) {
+                                Map<String, Boolean> projects = (Map<String, Boolean>) map.get("projectsMember");
+                                return new ArrayList<>(projects.keySet());
+                            }
+                        } else {
+                            throw task.getException();
+                        }
+                    }
+                    return null;
+                }
+
+            }
+        );
+
+    }
+
+    @Override
     public Task<Void> createProject(final Project project) throws Errors.CreateProjectException {
 
         return database.collection("projects").add(project.toMap()).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<DocumentReference, String>() {
 
             @Override
             public String then(@NonNull Task<DocumentReference> task) throws Exception {
-                if (task.isSuccessful()) {
-                    return task.getResult().getId();
-                } else {
-                    throw task.getException();
-                }
+            if (task.isSuccessful()) {
+                return task.getResult().getId();
+            } else {
+                throw task.getException();
+            }
             }
         }).continueWithTask(new Continuation<String, Task<Void>>() {
             @Override
             public Task<Void> then(@NonNull Task<String> task) throws Exception {
-                if (task.isSuccessful()) {
-                    project.setUID(task.getResult());
-                    return updateProject(project);
-                } else {
-                    throw task.getException();
-                }
+            if (task.isSuccessful()) {
+                project.setUID(task.getResult());
+                return updateProject(project);
+            } else {
+                throw task.getException();
+            }
             }
         });
     }
@@ -187,20 +215,20 @@ class FirebaseStore implements IAsyncStore {
         return auth.signInWithEmailAndPassword(username, password).continueWith(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<AuthResult, String>() {
             @Override
             public String then(@NonNull Task<AuthResult> task) throws Exception {
-                if(task.isSuccessful()){
-                    return task.getResult().getUser().getUid();
-                } else {
-                    throw task.getException();
-                }
+            if(task.isSuccessful()){
+                return task.getResult().getUser().getUid();
+            } else {
+                throw task.getException();
+            }
             }
         }).continueWithTask(new Continuation<String, Task<User>>() {
             @Override
             public Task<User> then(@NonNull Task<String> task) throws Exception {
-                if(task.isSuccessful()) {
-                    return getUser(task.getResult());
-                } else {
-                    throw task.getException();
-                }
+            if(task.isSuccessful()) {
+                return getUser(task.getResult());
+            } else {
+                throw task.getException();
+            }
             }
         });
     }
@@ -337,19 +365,45 @@ class FirebaseStore implements IAsyncStore {
         return database.collection("users").document(uid).update("rating", rating);
     }
 
+    public Task<Double> getRating(String userUID){
+        return database.collection("users").document(userUID).get()
+        .continueWith(
+                AsyncTask.THREAD_POOL_EXECUTOR,
+                new Continuation<DocumentSnapshot, Double>() {
+                    @Override
+                    public Double then(@NonNull Task<DocumentSnapshot> task) throws Exception {
+                        if(task.isSuccessful()){
+                            DocumentSnapshot document = task.getResult();
+                            if(document.exists()) {
+                                Map<String, Object> map = document.getData();
+                                if (map.get("rating") != null) {
+                                    return (Double)map.get("rating");
+                                }
+                            } else {
+                                throw task.getException();
+                            }
+                        }
+                        return null;
+                    }
+                }
+        );
+
+    }
+
+
     @Override
     public Task<Void> removeProjectOwned(User currentUser, final String uid) {
         final DocumentReference reference = database.collection("users").document(currentUser.getUID());
         return reference.get().continueWithTask(new Continuation<DocumentSnapshot, Task<Void>>() {
             @Override
             public Task<Void> then(@NonNull Task<DocumentSnapshot> task) throws Exception {
-                if(task.isSuccessful()){
-                    Map<String, Object> data = task.getResult().getData();
-                    data.remove(uid);
-                    return reference.update("projectsOwned", data.get("projectsOwned"));
-                } else {
-                    throw task.getException();
-                }
+            if(task.isSuccessful()){
+                Map<String, Object> data = task.getResult().getData();
+                data.remove(uid);
+                return reference.update("projectsOwned", data.get("projectsOwned"));
+            } else {
+                throw task.getException();
+            }
             }
         });
     }

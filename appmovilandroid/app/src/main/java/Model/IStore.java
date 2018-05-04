@@ -45,6 +45,9 @@ interface IAsyncStore {
     Task<Void> deleteProject(Project project);
 
     Task<Void> rateUser(String uid, double rating);
+    Task<Double> getRating(String uid);
 
     Task<Void> removeProjectOwned(User currentUser, String uid);
+
+    Task<ArrayList<String>> getMemberedProjects(String uid);
 }

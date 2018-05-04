@@ -14,6 +14,7 @@ public interface IModel {
 
     Task<ArrayList<Project>> getAvailableProjects();
     Task<ArrayList<Project>> getMyProjects();
+    Task<ArrayList<String>> getMemberedProjects(String uid);
     void viewNotification(Project project);
 
     Task<ArrayList<User>> getApplicants(String projectUID);
@@ -34,5 +35,6 @@ public interface IModel {
 
     Task<ArrayList<Project>> getOwnedProjects();
     Task<Void> rateUser(String uid, double rating);
+    Task<Double> getRating( String uid );
     //Task<HashMap<Project, Boolean>> getNotifications();
 }

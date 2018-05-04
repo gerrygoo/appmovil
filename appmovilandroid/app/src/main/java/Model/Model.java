@@ -57,6 +57,11 @@ public class Model implements IModel {
     }
 
     @Override
+    public Task<ArrayList<String>> getMemberedProjects(String uid) {
+        return Store.getMemberedProjects(uid);
+    }
+
+    @Override
     public void viewNotification(Project project) {
         currentUser.viewNotification(project);
         Log.e("Notification", "viewed");
@@ -152,6 +157,12 @@ public class Model implements IModel {
     public Task<Void> rateUser(String uid, double rating) {
         return Store.rateUser(uid, rating);
     }
+
+    @Override
+    public Task<Double> getRating(String uid) {
+        return Store.getRating(uid);
+    }
+
 //
 //    @Override
 //    public Task<HashMap<Project, Boolean>> getNotifications() {

@@ -98,15 +98,15 @@ public class YourProjectsFrag extends Fragment {
 
             @Override
             public void loadProfile(User user) {
-                    Fragment profile = new OtherProfileFrag();
-                    Bundle argsProfile = new Bundle();
+                Fragment profile = new OtherProfileFrag();
+                Bundle argsProfile = new Bundle();
 
-                    argsProfile.putParcelable(OtherProfileFrag.ARG_USER, user);
-                    argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, false);
+                argsProfile.putParcelable(OtherProfileFrag.ARG_USER, user);
+                argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, false);
 
-                    profile.setArguments(argsProfile);
-                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).addToBackStack(MainScreenActivity.BACK_STACK);
-                    transaction.commit();
+                profile.setArguments(argsProfile);
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).addToBackStack(MainScreenActivity.BACK_STACK);
+                transaction.commit();
             }
         };
     }
@@ -132,6 +132,28 @@ public class YourProjectsFrag extends Fragment {
                         Log.e("Lengths", "" + Model.getInstance().getCurrentUser().getProjectsOwned() + "" + projects.size() +"");
                         return projects;
                     } else {
+                        final ArrayList<ArrayList<String>> myprojcets = new ArrayList<ArrayList<String>>();
+                        new AsyncTask<Void, Void, Void>(){
+
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                try {
+                                    myprojcets.add( Tasks.await(Model.getInstance().getMemberedProjects(user.getUID())) );
+                                } catch (ExecutionException | InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                return null;
+                            }
+
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+
+                            }
+
+                        }.execute();
+
+                        if (myprojcets.size() > 0) user.setProjectsMember(myprojcets.get(0));
+
                         ArrayList<Project> projects = Tasks.await(Model.getInstance().getMyProjects());
                         return projects;
                     }
