@@ -147,9 +147,8 @@ public class AdapterRV extends RecyclerView.Adapter<AdapterRV.ViewCard> {
                         applicantCard.addView(deny);
 
                         container.addView(applicantCard);
-
-                        bar.setVisibility(View.INVISIBLE);
                     }
+                    bar.setVisibility(View.INVISIBLE);
                 }
             }.execute();
         }

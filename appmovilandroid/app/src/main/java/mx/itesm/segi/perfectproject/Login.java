@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,11 +16,15 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.AuthResult;
 
 import java.util.concurrent.ExecutionException;
 
 import Model.Errors;
+import Model.User;
 import Model.Model;
 
 public class Login extends AppCompatActivity {
@@ -57,6 +62,7 @@ public class Login extends AppCompatActivity {
             @SuppressLint("StaticFieldLeak")
             @Override
             public void onClick(View view) {
+
                 final String email = emailTxt.getText().toString();
                 if(email.isEmpty()){
                     errorText.setText("Please add an email");

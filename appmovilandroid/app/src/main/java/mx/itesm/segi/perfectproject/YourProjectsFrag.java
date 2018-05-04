@@ -155,6 +155,7 @@ public class YourProjectsFrag extends Fragment {
                 Log.e("Fetched", "true" + param.size());
 
                 bar.setVisibility(View.INVISIBLE);
+                Log.e("Invisible", "true");
             }
         }.execute();
         rvYourProjects.setAdapter(adapterRV);

@@ -66,8 +66,14 @@ public class User implements Parcelable{
 
         if(map.get("rating") instanceof Double) {
             Rating = (Double) map.get("rating");
+        } else if(map.get("rating") instanceof Float) {
+            Rating = (Float) map.get("rating");
+        } else if(map.get("rating") instanceof Integer) {
+            Rating = (Integer) map.get("rating");
+        } else if(map.get("rating") instanceof Long) {
+            Rating = (Long) map.get("rating");
         } else {
-            Rating = 4.0;
+            Rating = 3.0;
         }
         ProjectsMember = (ArrayList<String>) map.get("projectsMember");
         ProjectsOwned = (ArrayList<String>) map.get("projectsOwned");
@@ -82,6 +88,9 @@ public class User implements Parcelable{
         if(ReviewedProjects == null){
             ReviewedProjects = new HashMap<>();
         }
+        if(Notifications == null){
+            Notifications = new HashMap<>();
+        }
     }
 
     public Map<String, Object> toMap(){
@@ -94,8 +103,8 @@ public class User implements Parcelable{
         result.put("rating",Rating);
         result.put("projectsMember", ProjectsMember);
         result.put("projectsOwned", ProjectsOwned);
-        result.put("reviewedProjects", ReviewedProjects);
-        result.put("notifications", Notifications);
+        result.put("reviewedProjects", ReviewedProjects.isEmpty() ? null : ReviewedProjects);
+        result.put("notifications", Notifications.isEmpty() ? null : Notifications);
         result.put("profileImageUrl", ProfileImageURL);
 
         return result;
