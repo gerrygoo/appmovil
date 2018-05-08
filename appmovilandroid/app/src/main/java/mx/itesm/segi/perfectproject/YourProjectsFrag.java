@@ -124,6 +124,7 @@ public class YourProjectsFrag extends Fragment {
         bar.setVisibility(View.VISIBLE);
 
         new AsyncTask<Void, Void, ArrayList<Project>>(){
+
             @Override
             protected ArrayList<Project> doInBackground(Void... voids) {
                 try {
@@ -132,29 +133,10 @@ public class YourProjectsFrag extends Fragment {
                         Log.e("Lengths", "" + Model.getInstance().getCurrentUser().getProjectsOwned() + "" + projects.size() +"");
                         return projects;
                     } else {
-                        final ArrayList<ArrayList<String>> myprojcets = new ArrayList<ArrayList<String>>();
-                        new AsyncTask<Void, Void, Void>(){
 
-                            @Override
-                            protected Void doInBackground(Void... voids) {
-                                try {
-                                    myprojcets.add( Tasks.await(Model.getInstance().getMemberedProjects(user.getUID())) );
-                                } catch (ExecutionException | InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                return null;
-                            }
-
-                            @Override
-                            protected void onPostExecute(Void aVoid) {
-
-                            }
-
-                        }.execute();
-
-                        if (myprojcets.size() > 0) user.setProjectsMember(myprojcets.get(0));
-
-                        ArrayList<Project> projects = Tasks.await(Model.getInstance().getMyProjects());
+                        Model.getInstance().getCurrentUser().setProjectsMember(Tasks.await( Model.getInstance().getMemberedProjects(user.getUID()) ));
+                        ArrayList<Project> projects = Tasks.await( Model.getInstance().getMyProjects() );
+                        Log.i("Membered", projects.toString());
                         return projects;
                     }
                 } catch (ExecutionException | InterruptedException e) {
@@ -180,6 +162,8 @@ public class YourProjectsFrag extends Fragment {
                 Log.e("Invisible", "true");
             }
         }.execute();
+
+
         rvYourProjects.setAdapter(adapterRV);
     }
 

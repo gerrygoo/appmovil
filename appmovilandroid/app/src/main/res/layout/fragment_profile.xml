@@ -117,6 +117,11 @@
                 android:numStars="5" />
         </LinearLayout>
 
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/black"/>
+
         <Button
             android:id="@+id/bPremium"
             android:layout_width="wrap_content"
@@ -127,6 +132,12 @@
             android:text="Premium"
             android:textAlignment="center" />
 
+        <Button
+            android:id="@+id/logoutBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Log Out" />
+
         <Switch
             android:id="@+id/sEmployer"
             android:layout_width="match_parent"
@@ -135,8 +146,13 @@
             android:layout_alignParentStart="true"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
-            android:text="@string/str_employer"
+            android:text="Employer mode"
             android:textSize="20sp" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/black"/>
 
         <Button
             android:id="@+id/btnAddSkill"

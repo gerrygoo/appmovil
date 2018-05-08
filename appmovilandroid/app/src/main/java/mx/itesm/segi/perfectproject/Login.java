@@ -95,6 +95,11 @@ public class Login extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        errorText.setText("");
+    }
 
     @SuppressLint("StaticFieldLeak")
     private void authenticate(final String email, final String password){
@@ -122,7 +127,7 @@ public class Login extends AppCompatActivity {
                     startActivity(new Intent(context, MainScreenActivity.class));
                 } else {
                     errorText.setTextColor(Color.RED);
-                    errorText.setText("Given credentials failed to authenticate.");
+                    errorText.setText(R.string.Generic_Auth_error);
                 }
                 bar.setVisibility(View.INVISIBLE);
             }
@@ -152,11 +157,15 @@ public class Login extends AppCompatActivity {
 //        });
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void handleSubmit() {
         final String
                 email = emailTxt.getText().toString(),
                 password = passwordTxt.getText().toString();
+
+        if( email.isEmpty() || password.isEmpty() ) {
+            errorText.setText(R.string.Missing_fields);
+        }
+
         authenticate(email, password);
     }
 

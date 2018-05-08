@@ -49,4 +49,6 @@
     <string name="str_Skills">Skills</string>
     <string name="str_email">Email</string>
     <string name="email_not_available">Email not available</string>
+    <string name="Missing_fields">Missing field(s)</string>
+    <string name="Generic_Auth_error">Given credentials failed to authenticate.</string>
 </resources>
