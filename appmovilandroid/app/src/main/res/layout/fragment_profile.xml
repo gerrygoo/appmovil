@@ -161,4 +161,14 @@
         </ScrollView>
 
     </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabAbout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginVertical="8dp"
+        android:clickable="true"
+        android:src="@android:drawable/ic_dialog_info" />
 </FrameLayout>

@@ -10,7 +10,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -59,6 +61,7 @@ public class ProfileFrag extends Fragment {
     private ImageView ivProfile;
     private LinearLayout skillLayout;
     private Button addSkill;
+    private FloatingActionButton about;
 
     private User user;
 
@@ -91,6 +94,7 @@ public class ProfileFrag extends Fragment {
         ivProfile=v.findViewById(R.id.ivProfile);
         rateNum = v.findViewById(R.id.rateNumber);
         addSkill = v.findViewById(R.id.btnAddSkill);
+        about = v.findViewById(R.id.fabAbout);
 
 //        tvCurriculum.setKeyListener(null);
         Mode = v.findViewById(R.id.sEmployer);
@@ -142,6 +146,16 @@ public class ProfileFrag extends Fragment {
                 Add_New_Line(v);
 
                // saveSkill(v);
+            }
+        });
+
+
+        about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment about = new AboutFrag();
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, about).addToBackStack(MainScreenActivity.BACK_STACK);
+                transaction.commit();
             }
         });
 
