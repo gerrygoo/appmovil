@@ -87,7 +87,6 @@ public class SignUp extends AppCompatActivity {
 
         try {
             Model.getInstance().register(new User(email, name), password);
-
         } catch (Errors.RegisterException exception) {
             if(exception.getError() == Errors.RegisterError.AccountAlreadyExists || exception.getError() == Errors.RegisterError.UsernameInUse){
                 emailTxt.setError("That account is already in use");

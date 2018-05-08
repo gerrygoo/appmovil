@@ -134,9 +134,14 @@ public class YourProjectsFrag extends Fragment {
                         return projects;
                     } else {
 
-                        Model.getInstance().getCurrentUser().setProjectsMember(Tasks.await( Model.getInstance().getMemberedProjects(user.getUID()) ));
+
+                        ArrayList<String> uids = Tasks.await( Model.getInstance().getMemberedProjects(user.getUID()) );
+                        if (uids == null) { uids = new ArrayList<String>(); }
+
+                        Model.getInstance().getCurrentUser()
+                        .setProjectsMember( uids );
+
                         ArrayList<Project> projects = Tasks.await( Model.getInstance().getMyProjects() );
-                        Log.i("Membered", projects.toString());
                         return projects;
                     }
                 } catch (ExecutionException | InterruptedException e) {
