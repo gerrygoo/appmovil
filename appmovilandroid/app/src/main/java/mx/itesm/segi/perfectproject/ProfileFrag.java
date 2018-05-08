@@ -58,7 +58,6 @@ public class ProfileFrag extends Fragment {
     private RatingBar rbRating;
     private Switch Mode;
     private OnSwitchToggleListener listener;
-    private ImageView ivProfile;
     private LinearLayout skillLayout;
     private Button addSkill;
     private FloatingActionButton about;
@@ -90,9 +89,7 @@ public class ProfileFrag extends Fragment {
         tvName = v.findViewById(R.id.tvName);
         tvCompany = v.findViewById(R.id.tvCompany);
         //tvCurriculum = v.findViewById(R.id.etCurriculum);
-        editProfilePicture = v.findViewById(R.id.editProfilePic);
         rbRating = v.findViewById(R.id.rbRating);
-        ivProfile=v.findViewById(R.id.ivProfile);
         rateNum = v.findViewById(R.id.rateNumber);
         addSkill = v.findViewById(R.id.btnAddSkill);
         about = v.findViewById(R.id.fabAbout);
@@ -101,7 +98,6 @@ public class ProfileFrag extends Fragment {
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Model.getInstance().logout();
                 startActivity(new Intent(getContext(), Login.class));
             }
         });
@@ -142,12 +138,6 @@ public class ProfileFrag extends Fragment {
             }
         });*/
 
-        editProfilePicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setProfilePic(view);
-            }
-        });
 
         addSkill.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,29 +214,22 @@ public class ProfileFrag extends Fragment {
         numberOfLines++;
     }
 
-    public void setProfilePic(View v) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        startActivityForResult(intent, PICK_PHOTO_FOR_AVATAR);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_PHOTO_FOR_AVATAR && resultCode == Activity.RESULT_OK) {
-            try {
-                InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
-                Bitmap BMimage = BitmapFactory.decodeStream(inputStream);
-                ivProfile.setImageBitmap(BMimage);
-                user.setProfileImage(BMimage);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
-        }
-        else if(resultCode==Activity.RESULT_CANCELED){
-            //No se eligió imagen de Profile Pic.
-        }
+//        if (requestCode == PICK_PHOTO_FOR_AVATAR && resultCode == Activity.RESULT_OK) {
+//            try {
+//                InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
+//                Bitmap BMimage = BitmapFactory.decodeStream(inputStream);
+//                user.setProfileImage(BMimage);
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//            //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
+//        }
+//        else if(resultCode==Activity.RESULT_CANCELED){
+//            //No se eligió imagen de Profile Pic.
+//        }
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -273,7 +256,6 @@ public class ProfileFrag extends Fragment {
         }.execute();
 
         user = getArguments().getParcelable(ARG_USER);
-        ivProfile.setImageBitmap(user.getProfileImage());
         tvCompany.setText(user.getCompany());
         tvName.setText(user.getName());
         rbRating.setRating((float) user.getRating());
