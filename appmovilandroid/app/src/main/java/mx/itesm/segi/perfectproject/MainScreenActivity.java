@@ -145,6 +145,8 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private boolean handleNavigation(int id){
+
+        findViewById(R.id.noProyectsFragment).setVisibility(View.INVISIBLE);
         clearFragments();
         switch (id) {
             case R.id.navigation_profile:
@@ -202,15 +204,22 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     private void renderCards(int first, int second){
         Fragment top, bottom;
+        boolean empty = true;
         if(first < projects.size()) {
+            empty = false;
             top = projectToCard(projects.get(first));
         } else {
             top = new Fragment();
         }
-        if(second < projects.size()) {
+        if(second < projects.size())
+        {
+            empty = false;
             bottom = projectToCard(projects.get(second));
         } else {
             bottom = new Fragment();
+        }
+        if(empty) {
+            findViewById(R.id.noProyectsFragment).setVisibility(View.VISIBLE);
         }
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerDraggable, top).commit();
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, bottom).commit();

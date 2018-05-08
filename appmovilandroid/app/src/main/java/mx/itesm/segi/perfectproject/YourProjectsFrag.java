@@ -174,10 +174,11 @@ public class YourProjectsFrag extends Fragment {
                     adapterRV.notifyDataSetChanged();
                 }
                 projects = param;
-                Log.e("Fetched", "true" + param.size());
+                if(projects == null || projects.isEmpty()){
+                    getActivity().findViewById(R.id.noProyectsFragment).setVisibility(View.VISIBLE);
+                }
 
                 bar.setVisibility(View.INVISIBLE);
-                Log.e("Invisible", "true");
             }
         }.execute();
         rvYourProjects.setAdapter(adapterRV);
