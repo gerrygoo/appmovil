@@ -1,9 +1,12 @@
 package mx.itesm.segi.perfectproject;
 
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +14,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 
-import java.util.ArrayList;
+import com.google.android.gms.tasks.Tasks;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
+import Model.Model;
 import Model.User;
 
 
@@ -52,8 +59,29 @@ public class OtherProfileFrag extends Fragment {
         loadUser();
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void loadUser() {
         user = getArguments().getParcelable(ARG_USER);
+
+        new AsyncTask<Void, Void, Void>(){
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    user.setRating( Tasks.await(Model.getInstance().getRating(user.getUID()) ) );
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+
+            }
+
+        }.execute();
+
         ivProfile = getActivity().findViewById(R.id.ivProfile);
         tvName = getActivity().findViewById(R.id.tvName);
         tvCompany = getActivity().findViewById(R.id.tvCompany);
