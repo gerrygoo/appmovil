@@ -53,7 +53,7 @@ public class Model implements IModel {
 
     @Override
     public Task<ArrayList<Project>> getMyProjects() {
-        return Store.getProjects(currentUser.getProjectsMember());
+            return Store.getProjects(currentUser.getProjectsMember());
     }
 
     @Override

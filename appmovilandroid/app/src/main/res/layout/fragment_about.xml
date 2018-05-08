@@ -120,7 +120,7 @@
                         android:layout_weight="1"
                         android:editable="false"
                         android:inputType="none"
-                        android:text="Gerardo" />
+                        android:text="Gerardo Galván Olvera" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -137,7 +137,7 @@
                         android:layout_weight="1"
                         android:editable="false"
                         android:inputType="text"
-                        android:text="A0137@itesm.mx" />
+                        android:text="A01371872@itesm.mx" />
 
                 </android.support.design.widget.TextInputLayout>
 
