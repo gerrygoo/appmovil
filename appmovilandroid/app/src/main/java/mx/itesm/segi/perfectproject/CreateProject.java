@@ -28,6 +28,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.Tasks;
 
@@ -91,7 +92,6 @@ public class CreateProject extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -331,6 +331,7 @@ public class CreateProject extends Fragment {
                         Tasks.await(Model.getInstance().createProject(project));
 
                     } catch (ExecutionException | InterruptedException | Errors.CreateProjectException e) {
+                        Toast.makeText(getContext(), "Error creating project", Toast.LENGTH_LONG  ).show();
                         e.printStackTrace();
                     }
                     return null;
@@ -348,6 +349,7 @@ public class CreateProject extends Fragment {
                     Description.setText("");
 
                     bar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(getContext(), "Project Created", Toast.LENGTH_LONG  ).show();
                 }
             }.execute();
         }

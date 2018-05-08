@@ -18,6 +18,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -55,6 +56,7 @@ public class ProjectInfoFrag extends Fragment {
     private TextView tvPositions;
     private TextView tvLocation;
     private TextView tvDescription;
+    private Button logoutButton;
     private ImageView ivLogo;
     private LinearLayout llContainer;
     private FloatingActionButton fabDelete;

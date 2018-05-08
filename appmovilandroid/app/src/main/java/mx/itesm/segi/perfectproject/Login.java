@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,11 +16,15 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.AuthResult;
 
 import java.util.concurrent.ExecutionException;
 
 import Model.Errors;
+import Model.User;
 import Model.Model;
 
 public class Login extends AppCompatActivity {
@@ -57,6 +62,7 @@ public class Login extends AppCompatActivity {
             @SuppressLint("StaticFieldLeak")
             @Override
             public void onClick(View view) {
+
                 final String email = emailTxt.getText().toString();
                 if(email.isEmpty()){
                     errorText.setText("Please add an email");
@@ -89,6 +95,11 @@ public class Login extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        errorText.setText("");
+    }
 
     @SuppressLint("StaticFieldLeak")
     private void authenticate(final String email, final String password){
@@ -116,7 +127,7 @@ public class Login extends AppCompatActivity {
                     startActivity(new Intent(context, MainScreenActivity.class));
                 } else {
                     errorText.setTextColor(Color.RED);
-                    errorText.setText("Given credentials failed to authenticate.");
+                    errorText.setText(R.string.Generic_Auth_error);
                 }
                 bar.setVisibility(View.INVISIBLE);
             }
@@ -146,11 +157,15 @@ public class Login extends AppCompatActivity {
 //        });
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void handleSubmit() {
         final String
                 email = emailTxt.getText().toString(),
                 password = passwordTxt.getText().toString();
+
+        if( email.isEmpty() || password.isEmpty() ) {
+            errorText.setText(R.string.Missing_fields);
+        }
+
         authenticate(email, password);
     }
 

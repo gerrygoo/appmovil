@@ -3,14 +3,13 @@ package mx.itesm.segi.perfectproject;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.app.FragmentManager;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Choreographer;
@@ -25,8 +24,10 @@ import android.widget.ProgressBar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import Model.Model;
 import Model.IModel;
@@ -58,6 +59,9 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
             return handleNavigation(item.getItemId());
         }
     };
+
+    @Override
+    public void onBackPressed() { getSupportFragmentManager().popBackStack(); }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +147,8 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private boolean handleNavigation(int id){
+
+        findViewById(R.id.noProyectsFragment).setVisibility(View.INVISIBLE);
         clearFragments();
         switch (id) {
             case R.id.navigation_profile:
@@ -200,15 +206,22 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
 
     private void renderCards(int first, int second){
         Fragment top, bottom;
+        boolean empty = true;
         if(first < projects.size()) {
+            empty = false;
             top = projectToCard(projects.get(first));
         } else {
             top = new Fragment();
         }
-        if(second < projects.size()) {
+        if(second < projects.size())
+        {
+            empty = false;
             bottom = projectToCard(projects.get(second));
         } else {
             bottom = new Fragment();
+        }
+        if(empty) {
+            findViewById(R.id.noProyectsFragment).setVisibility(View.VISIBLE);
         }
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacerDraggable, top).commit();
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, bottom).commit();
@@ -342,7 +355,7 @@ public class MainScreenActivity extends AppCompatActivity implements ProfileFrag
     }
 
     private void clearFragments(){
-        getSupportFragmentManager().popBackStackImmediate(MainScreenActivity.BACK_STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        getSupportFragmentManager().popBackStackImmediate(BACK_STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         for(Fragment f: activeFragments) {
             getSupportFragmentManager().beginTransaction().remove(f).commit();
         }

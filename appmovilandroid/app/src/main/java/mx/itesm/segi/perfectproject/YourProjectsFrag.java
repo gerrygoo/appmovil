@@ -98,15 +98,15 @@ public class YourProjectsFrag extends Fragment {
 
             @Override
             public void loadProfile(User user) {
-                    Fragment profile = new OtherProfileFrag();
-                    Bundle argsProfile = new Bundle();
+                Fragment profile = new OtherProfileFrag();
+                Bundle argsProfile = new Bundle();
 
-                    argsProfile.putParcelable(OtherProfileFrag.ARG_USER, user);
-                    argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, false);
+                argsProfile.putParcelable(OtherProfileFrag.ARG_USER, user);
+                argsProfile.putBoolean(OtherProfileFrag.ARG_JOINED, false);
 
-                    profile.setArguments(argsProfile);
-                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).addToBackStack(MainScreenActivity.BACK_STACK);
-                    transaction.commit();
+                profile.setArguments(argsProfile);
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragmentPlacer, profile).addToBackStack(MainScreenActivity.BACK_STACK);
+                transaction.commit();
             }
         };
     }
@@ -124,6 +124,7 @@ public class YourProjectsFrag extends Fragment {
         bar.setVisibility(View.VISIBLE);
 
         new AsyncTask<Void, Void, ArrayList<Project>>(){
+
             @Override
             protected ArrayList<Project> doInBackground(Void... voids) {
                 try {
@@ -132,7 +133,10 @@ public class YourProjectsFrag extends Fragment {
                         Log.e("Lengths", "" + Model.getInstance().getCurrentUser().getProjectsOwned() + "" + projects.size() +"");
                         return projects;
                     } else {
-                        ArrayList<Project> projects = Tasks.await(Model.getInstance().getMyProjects());
+
+                        Model.getInstance().getCurrentUser().setProjectsMember(Tasks.await( Model.getInstance().getMemberedProjects(user.getUID()) ));
+                        ArrayList<Project> projects = Tasks.await( Model.getInstance().getMyProjects() );
+                        Log.i("Membered", projects.toString());
                         return projects;
                     }
                 } catch (ExecutionException | InterruptedException e) {
@@ -152,11 +156,15 @@ public class YourProjectsFrag extends Fragment {
                     adapterRV.notifyDataSetChanged();
                 }
                 projects = param;
-                Log.e("Fetched", "true" + param.size());
+                if(projects == null || projects.isEmpty()){
+                    getActivity().findViewById(R.id.noProyectsFragment).setVisibility(View.VISIBLE);
+                }
 
                 bar.setVisibility(View.INVISIBLE);
             }
         }.execute();
+
+
         rvYourProjects.setAdapter(adapterRV);
     }
 

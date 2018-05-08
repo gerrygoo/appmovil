@@ -62,6 +62,7 @@ public class ProfileFrag extends Fragment {
     private LinearLayout skillLayout;
     private Button addSkill;
     private FloatingActionButton about;
+    private Button logoutBtn;
 
     private User user;
 
@@ -95,6 +96,15 @@ public class ProfileFrag extends Fragment {
         rateNum = v.findViewById(R.id.rateNumber);
         addSkill = v.findViewById(R.id.btnAddSkill);
         about = v.findViewById(R.id.fabAbout);
+        logoutBtn = v.findViewById(R.id.logoutBtn);
+
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Model.getInstance().logout();
+                startActivity(new Intent(getContext(), Login.class));
+            }
+        });
 
 //        tvCurriculum.setKeyListener(null);
         Mode = v.findViewById(R.id.sEmployer);
@@ -239,7 +249,29 @@ public class ProfileFrag extends Fragment {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void loadProfileInfo(View v) {
+
+        final Double[] rating = {0.0};
+        new AsyncTask<Void, Void, Void>(){
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    rating[0] = Tasks.await(Model.getInstance().getRating(user.getUID())) ;
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                user.setRating(rating[0]);
+            }
+
+        }.execute();
+
         user = getArguments().getParcelable(ARG_USER);
         ivProfile.setImageBitmap(user.getProfileImage());
         tvCompany.setText(user.getCompany());

@@ -15,11 +15,11 @@ import java.util.ArrayList;
 
 public class Model implements IModel {
 
-    private final IAsyncStore Store;
+    private final FirebaseStore Store;
     private static Model instance;
     private User currentUser;
 
-    private Model(IAsyncStore store){
+    private Model(FirebaseStore store){
         Store = store;
     }
 
@@ -54,6 +54,11 @@ public class Model implements IModel {
     @Override
     public Task<ArrayList<Project>> getMyProjects() {
         return Store.getProjects(currentUser.getProjectsMember());
+    }
+
+    @Override
+    public Task<ArrayList<String>> getMemberedProjects(String uid) {
+        return Store.getMemberedProjects(uid);
     }
 
     @Override
@@ -152,6 +157,12 @@ public class Model implements IModel {
     public Task<Void> rateUser(String uid, double rating) {
         return Store.rateUser(uid, rating);
     }
+
+    @Override
+    public Task<Double> getRating(String uid) {
+        return Store.getRating(uid);
+    }
+
 //
 //    @Override
 //    public Task<HashMap<Project, Boolean>> getNotifications() {
@@ -180,7 +191,7 @@ public class Model implements IModel {
         if(accept) {
             project.addTeamMember(applicant);
             applicant.addProject(project);
-            Store.updateUser(applicant);
+            Store.addProjectMember(applicant.getUID(), project.getUID());
         }
         project.removeApplicant(applicant);
         Store.updateProject(project);
@@ -254,7 +265,7 @@ public class Model implements IModel {
                     parent.continueWithTask(new Continuation<Void, Task<Void>>() {
                         @Override
                         public Task<Void> then(@NonNull Task<Void> task) throws Exception {
-                            return Store.updateUser(member);
+                            return Store.removeProjectMember(member.getUID(), project.getUID());
                         }
                     });
                 }
