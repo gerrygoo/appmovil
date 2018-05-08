@@ -109,12 +109,6 @@
                 android:text="Premium"
                 android:textAlignment="center" />
 
-            <Button
-                android:id="@+id/logoutBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Log Out" />
-
             <Switch
                 android:id="@+id/sEmployer"
                 android:layout_width="match_parent"
@@ -152,6 +146,12 @@
                 </LinearLayout>
 
             </ScrollView>
+
+            <Button
+                android:id="@+id/logoutBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Log Out" />
 
         </LinearLayout>
     </ScrollView>

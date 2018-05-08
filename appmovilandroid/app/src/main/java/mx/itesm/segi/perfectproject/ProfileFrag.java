@@ -3,11 +3,8 @@ package mx.itesm.segi.perfectproject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -23,7 +20,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -31,8 +27,6 @@ import android.widget.Switch;
 
 import com.google.android.gms.tasks.Tasks;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
 import Model.Model;
