@@ -136,7 +136,6 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:editable="false"
-                        android:enabled="false"
                         android:inputType="none"
                         android:text="A01371872@itesm.mx" />
 
@@ -181,7 +180,6 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:editable="false"
-                        android:enabled="false"
                         android:inputType="none"
                         android:text="A01371036@itesm.mx" />
 
@@ -226,7 +224,6 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:editable="false"
-                        android:enabled="false"
                         android:inputType="none"
                         android:text="A01379696@itesm.mx" />
 
