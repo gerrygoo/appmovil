@@ -7,6 +7,7 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskCompletionSource;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 /**
@@ -283,6 +284,10 @@ public class Model implements IModel {
                 return Store.removeProjectOwned(currentUser, project.getUID());
             }
         });
+    }
+
+    public Task<String> uploadImageToStorage(ByteArrayOutputStream stream, String uid){
+        return Store.uploadImage(stream, uid);
     }
 
     public Task<Void> resetPassword(String email){

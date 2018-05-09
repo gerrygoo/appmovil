@@ -26,7 +26,9 @@ import android.widget.RatingBar;
 import android.widget.Switch;
 
 import com.google.android.gms.tasks.Tasks;
-
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
 import Model.Model;
@@ -208,22 +210,54 @@ public class ProfileFrag extends Fragment {
         numberOfLines++;
     }
 
+    public void setProfilePic(View v) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_PHOTO_FOR_AVATAR);
+    }
+
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == PICK_PHOTO_FOR_AVATAR && resultCode == Activity.RESULT_OK) {
-//            try {
-//                InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
-//                Bitmap BMimage = BitmapFactory.decodeStream(inputStream);
-//                user.setProfileImage(BMimage);
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//            //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
-//        }
-//        else if(resultCode==Activity.RESULT_CANCELED){
-//            //No se eligió imagen de Profile Pic.
-//        }
+        if (requestCode == PICK_PHOTO_FOR_AVATAR && resultCode == Activity.RESULT_OK) {
+            try {
+                InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
+                final Bitmap BMimage = BitmapFactory.decodeStream(inputStream);
+                ivProfile.setImageBitmap(BMimage);
+                user.setProfileImage(BMimage);
+
+                new AsyncTask<Void, Void, String>(){
+                    @Override
+                    protected String doInBackground(Void... voids) {
+                        try {
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            BMimage.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+                            return Tasks.await(Model.getInstance().uploadImageToStorage(stream, user.getUID()));
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(String url) {
+                        user.setProfileImageURL(url);
+                    }
+                }.execute();
+
+
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
+        }
+        else if(resultCode==Activity.RESULT_CANCELED){
+            //No se eligió imagen de Profile Pic.
+        }
+
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -271,9 +305,12 @@ public class ProfileFrag extends Fragment {
         for(int i=0;i<numberOfLines;i++){
             View et = ll.getChildAt(i);
             EditText s = (EditText)et;
-            if(!s.getText().toString().isEmpty()){
-                user.addSkill(s.getText().toString());
+            if (s !=null) {
+                if(!s.getText().toString().isEmpty()){
+                    user.addSkill(s.getText().toString());
+                }
             }
+
         }
 
         final ProgressBar bar = getActivity().findViewById(R.id.mainProgress);
