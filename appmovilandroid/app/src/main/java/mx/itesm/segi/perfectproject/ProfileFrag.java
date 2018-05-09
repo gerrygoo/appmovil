@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,6 +22,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -58,6 +61,7 @@ public class ProfileFrag extends Fragment {
     private Button addSkill;
     private FloatingActionButton about;
     private Button logoutBtn;
+    private ImageView ivProfile;
 
     private User user;
 
@@ -90,6 +94,7 @@ public class ProfileFrag extends Fragment {
         addSkill = v.findViewById(R.id.btnAddSkill);
         about = v.findViewById(R.id.fabAbout);
         logoutBtn = v.findViewById(R.id.logoutBtn);
+        ivProfile = v.findViewById(R.id.ivProfile);
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
