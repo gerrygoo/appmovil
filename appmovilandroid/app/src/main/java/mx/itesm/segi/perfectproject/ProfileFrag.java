@@ -101,7 +101,11 @@ public class ProfileFrag extends Fragment {
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { startActivity(new Intent(getContext(), Login.class)); }
+            public void onClick(View view) {
+                Intent i = new Intent(getContext(), Login.class);
+                i.setFlags(i.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(new Intent(getContext(), Login.class));
+            }
         });
 
 //        tvCurriculum.setKeyListener(null);
