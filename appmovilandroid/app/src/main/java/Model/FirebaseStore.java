@@ -264,41 +264,38 @@ class FirebaseStore implements IAsyncStore {
        return database.collection("users").document(user.getUID()).update(newUser);
     }
 
-    @Override
-    public Task<Void> updateProject(final Project project){
+    public Task<String> uploadImage(ByteArrayOutputStream stream, String uid) {
+
         final TaskCompletionSource<String> taskCompletionSource = new TaskCompletionSource<>();
         Task<String> upload = taskCompletionSource.getTask();
 
-        if(project.getImageUrl() == null || project.getImageUrl().isEmpty()) {
-            if(project.getImage() == null){
-                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=3f004413-394a-47de-b93f-b012bb895ea3";
-                taskCompletionSource.setResult(url);
-            }else {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                project.getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                Uri url = null;
-                try {
-                    FirebaseStorage.getInstance().getReference().child("images/" + project.getUID() + ".jpg").putBytes(stream.toByteArray()).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<String>>() {
-                        @Override
-                        public Task<String> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if(task.isSuccessful()){
-                                taskCompletionSource.setResult(task.getResult().getDownloadUrl().toString());
-                            }
-                            else {
-                                String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=5876e60f-1561-4431-8a0a-8fab5d4bd4cf";
-                                taskCompletionSource.setResult(url);
-                            }
-                            return taskCompletionSource.getTask();
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try {
+            FirebaseStorage.getInstance().getReference().child("images/" + uid + ".jpg").putBytes(stream.toByteArray()).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<String>>() {
+                @Override
+                public Task<String> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if(task.isSuccessful()){
+                        taskCompletionSource.setResult(task.getResult().getDownloadUrl().toString());
+                    }
+                    else {
+                        String url = "https://firebasestorage.googleapis.com/v0/b/perfect-project-f5f66.appspot.com/o/images%2Fplaceholder-profile.jpg?alt=media&token=5876e60f-1561-4431-8a0a-8fab5d4bd4cf";
+                        taskCompletionSource.setResult(url);
+                    }
+                    return taskCompletionSource.getTask();
                 }
-            }
-        } else {
-            taskCompletionSource.setResult(project.getImageUrl());
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return upload.continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
+
+        return upload;
+    }
+
+    @Override
+    public Task<Void> updateProject(final Project project){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        project.getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+        return uploadImage(stream, project.getUID()).continueWithTask(AsyncTask.THREAD_POOL_EXECUTOR, new Continuation<String, Task<Void>>() {
             @Override
             public Task<Void> then(@NonNull Task<String> task) throws Exception {
                 if (task.isSuccessful()) {

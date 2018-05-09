@@ -31,6 +31,7 @@ import android.widget.Switch;
 
 import com.google.android.gms.tasks.Tasks;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
@@ -100,10 +101,7 @@ public class ProfileFrag extends Fragment {
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Model.getInstance().logout();
-                startActivity(new Intent(getContext(), Login.class));
-            }
+            public void onClick(View view) { startActivity(new Intent(getContext(), Login.class)); }
         });
 
 //        tvCurriculum.setKeyListener(null);
@@ -230,15 +228,39 @@ public class ProfileFrag extends Fragment {
         startActivityForResult(intent, PICK_PHOTO_FOR_AVATAR);
     }
 
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_PHOTO_FOR_AVATAR && resultCode == Activity.RESULT_OK) {
             try {
                 InputStream inputStream = getContext().getContentResolver().openInputStream(data.getData());
-                Bitmap BMimage = BitmapFactory.decodeStream(inputStream);
+                final Bitmap BMimage = BitmapFactory.decodeStream(inputStream);
                 ivProfile.setImageBitmap(BMimage);
                 user.setProfileImage(BMimage);
+
+                new AsyncTask<Void, Void, String>(){
+                    @Override
+                    protected String doInBackground(Void... voids) {
+                        try {
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            BMimage.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+                            return Tasks.await(Model.getInstance().uploadImageToStorage(stream, user.getUID()));
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(String url) {
+                        user.setProfileImageURL(url);
+                    }
+                }.execute();
+
+
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
