@@ -164,6 +164,7 @@ public class Login extends AppCompatActivity {
 
         if( email.isEmpty() || password.isEmpty() ) {
             errorText.setText(R.string.Missing_fields);
+            return;
         }
 
         authenticate(email, password);
