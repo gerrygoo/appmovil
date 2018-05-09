@@ -24,6 +24,33 @@
                 android:layout_marginTop="5dp"
                 android:orientation="horizontal">
 
+                <RelativeLayout
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/ivProfile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_weight="0.5"
+                        android:src="@drawable/ic_account_circle_black_24dp" />
+
+                    <ImageButton
+                        android:id="@+id/editProfilePic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentEnd="true"
+                        android:adjustViewBounds="true"
+                        android:background="@android:color/transparent"
+                        android:scaleType="fitCenter"
+                        android:scaleX="0.6"
+                        android:scaleY="0.6"
+                        android:src="@android:drawable/ic_menu_edit" />
+                </RelativeLayout>
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -109,6 +136,12 @@
                 android:text="Premium"
                 android:textAlignment="center" />
 
+            <Button
+                android:id="@+id/logoutBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Log Out" />
+
             <Switch
                 android:id="@+id/sEmployer"
                 android:layout_width="match_parent"
@@ -146,12 +179,6 @@
                 </LinearLayout>
 
             </ScrollView>
-
-            <Button
-                android:id="@+id/logoutBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Log Out" />
 
         </LinearLayout>
     </ScrollView>
