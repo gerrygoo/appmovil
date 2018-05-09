@@ -92,7 +92,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:editable="false"
-                        android:inputType="text"
+                        android:inputType="none"
                         android:text="A01377503@itesm.mx" />
 
                 </android.support.design.widget.TextInputLayout>
@@ -136,7 +136,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:editable="false"
-                        android:inputType="text"
+                        android:inputType="none"
                         android:text="A01371872@itesm.mx" />
 
                 </android.support.design.widget.TextInputLayout>
@@ -180,7 +180,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:editable="false"
-                        android:inputType="text"
+                        android:inputType="none"
                         android:text="A01371036@itesm.mx" />
 
                 </android.support.design.widget.TextInputLayout>
@@ -224,7 +224,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:editable="false"
-                        android:inputType="text"
+                        android:inputType="none"
                         android:text="A01379696@itesm.mx" />
 
                 </android.support.design.widget.TextInputLayout>
