@@ -3,11 +3,8 @@ package mx.itesm.segi.perfectproject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -23,14 +20,12 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.Switch;
 
 import com.google.android.gms.tasks.Tasks;
-
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -59,7 +54,6 @@ public class ProfileFrag extends Fragment {
     private RatingBar rbRating;
     private Switch Mode;
     private OnSwitchToggleListener listener;
-    private ImageView ivProfile;
     private LinearLayout skillLayout;
     private Button addSkill;
     private FloatingActionButton about;
@@ -91,9 +85,7 @@ public class ProfileFrag extends Fragment {
         tvName = v.findViewById(R.id.tvName);
         tvCompany = v.findViewById(R.id.tvCompany);
         //tvCurriculum = v.findViewById(R.id.etCurriculum);
-        editProfilePicture = v.findViewById(R.id.editProfilePic);
         rbRating = v.findViewById(R.id.rbRating);
-        ivProfile=v.findViewById(R.id.ivProfile);
         rateNum = v.findViewById(R.id.rateNumber);
         addSkill = v.findViewById(R.id.btnAddSkill);
         about = v.findViewById(R.id.fabAbout);
@@ -101,7 +93,9 @@ public class ProfileFrag extends Fragment {
 
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { startActivity(new Intent(getContext(), Login.class)); }
+            public void onClick(View view) {
+                startActivity(new Intent(getContext(), Login.class));
+            }
         });
 
 //        tvCurriculum.setKeyListener(null);
@@ -140,12 +134,6 @@ public class ProfileFrag extends Fragment {
             }
         });*/
 
-        editProfilePicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setProfilePic(view);
-            }
-        });
 
         addSkill.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -269,6 +257,7 @@ public class ProfileFrag extends Fragment {
         else if(resultCode==Activity.RESULT_CANCELED){
             //No se eligió imagen de Profile Pic.
         }
+
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -295,7 +284,6 @@ public class ProfileFrag extends Fragment {
         }.execute();
 
         user = getArguments().getParcelable(ARG_USER);
-        ivProfile.setImageBitmap(user.getProfileImage());
         tvCompany.setText(user.getCompany());
         tvName.setText(user.getName());
         rbRating.setRating((float) user.getRating());
