@@ -241,7 +241,12 @@ public class CreateProject extends Fragment {
         } else if (Description.length() == 0) {
             Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
         } else {
-            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
+            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(",")));
+            int counter = 0;
+            for (String position : positions) {
+                positions.set(counter, position.trim());
+                counter++;
+            }
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
             project = new Project(
@@ -304,7 +309,12 @@ public class CreateProject extends Fragment {
         } else if (Description.length() == 0) {
             Snackbar.make(v, "Insert description", Snackbar.LENGTH_LONG).show();
         } else {
-            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(" ")));
+            ArrayList<String> positions = new ArrayList(Arrays.asList(Positions.getText().toString().split(",")));
+            int counter = 0;
+            for (String position : positions) {
+                positions.set(counter, position.trim());
+                counter++;
+            }
             Date Start = new SimpleDateFormat("dd/MM/yyyy").parse(StartDate.getText().toString());
             Date End = new SimpleDateFormat("dd/MM/yyyy").parse(EndDate.getText().toString());
             project = new Project(
@@ -361,7 +371,7 @@ public class CreateProject extends Fragment {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear,
                               int dayOfMonth) {
-            StartDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+            StartDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
         }
 
     };
@@ -370,7 +380,7 @@ public class CreateProject extends Fragment {
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear,
                               int dayOfMonth) {
-            EndDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
+            EndDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
         }
 
     };

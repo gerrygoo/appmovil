@@ -17,10 +17,11 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_margin="10dp"
             android:background="@android:color/transparent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:weightSum="1">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -100,8 +101,8 @@
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0">
+                android:layout_height="0dp"
+                android:layout_weight="0.5">
 
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/etPositions"
@@ -112,20 +113,21 @@
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="0">
 
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/etLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/str_location" />
+                    android:hint="@string/str_location"
+                    android:maxLines="1" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="0">
+                android:layout_height="0dp"
+                android:layout_weight="0.5">
 
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/etDescription"

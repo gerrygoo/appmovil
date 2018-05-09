@@ -6,10 +6,12 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
+import android.util.EventLogTags;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,10 +36,11 @@ public class ProjectCard extends Fragment {
     //View
     private TextView Title;
     private ImageView Logo;
-    private TextView StartDate;
-    private TextView Duration;
-    private TextView Positions;
-    private TextView Location;
+    private EditText StartDate;
+    private EditText Duration;
+    private EditText Positions;
+    private EditText Location;
+    private EditText Description;
     private Button Accept;
     private Button Decline;
     private ProgressBar progressBar;
@@ -84,15 +87,16 @@ public class ProjectCard extends Fragment {
         View result = inflater.inflate(R.layout.fragment_project_card, container, false);
         // Inflate the layout for this
 
-        Title = result.findViewById(R.id.projectCard_Title);;
+        Title = result.findViewById(R.id.projectCard_Title);
         Logo = result.findViewById(R.id.projectCard_Logo);
         StartDate = result.findViewById(R.id.projectCart_StartDate);
-        Duration = result.findViewById(R.id.projectCard_Duration);
+        Duration = result.findViewById(R.id.projectCard_EndDate);
         Positions = result.findViewById(R.id.projectCard_Positions);
         Location = result.findViewById(R.id.projectCard_Location);
         Accept = result.findViewById(R.id.projectCard_Accept);
         Decline = result.findViewById(R.id.projectCard_Decline);
         progressBar = result.findViewById(R.id.projectCard_ProgressBar);
+        Description = result.findViewById(R.id.projectCard_Description);
 
         Accept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,6 +141,7 @@ public class ProjectCard extends Fragment {
         project.getPositions().toArray(projectPositions);
 
         for(int i = 0; i < projectPositions.length; i++){
+            positions.append("\u2022");
             positions.append(projectPositions[i]);
             if(i != projectPositions.length - 1) {
                 positions.append("\n");
@@ -144,6 +149,7 @@ public class ProjectCard extends Fragment {
         }
         Positions.setText(positions.toString());
         Location.setText(project.getLocation());
+        Description.setText(project.getDescription());
     }
 
     public interface OnCardButtonClickListener {

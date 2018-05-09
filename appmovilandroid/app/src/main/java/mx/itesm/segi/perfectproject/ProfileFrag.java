@@ -278,6 +278,14 @@ public class ProfileFrag extends Fragment {
     @SuppressLint("StaticFieldLeak")
     private void loadProfileInfo(View v) {
 
+        user = getArguments().getParcelable(ARG_USER);
+        ivProfile.setImageBitmap(user.getProfileImage());
+        tvCompany.setText(user.getCompany());
+        tvName.setText(user.getName());
+        rbRating.setRating((float) user.getRating());
+        rateNum.setText(String.valueOf(user.getRating()));
+        Mode.setChecked(getArguments().getBoolean(ARG_MODE));
+
         final Double[] rating = {0.0};
         new AsyncTask<Void, Void, Void>(){
 
@@ -297,14 +305,6 @@ public class ProfileFrag extends Fragment {
             }
 
         }.execute();
-
-        user = getArguments().getParcelable(ARG_USER);
-        ivProfile.setImageBitmap(user.getProfileImage());
-        tvCompany.setText(user.getCompany());
-        tvName.setText(user.getName());
-        rbRating.setRating((float) user.getRating());
-        rateNum.setText(String.valueOf(user.getRating()));
-        Mode.setChecked(getArguments().getBoolean(ARG_MODE));
         for(int i=0;i<user.getSkills().size(); i++){
             Add_Line(v, user.getSkills().get(i));
         }

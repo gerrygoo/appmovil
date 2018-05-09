@@ -40,7 +40,7 @@ public class Model implements IModel {
                     ArrayList<String> uids = task.getResult();
                     ArrayList<String> pendingProjects = new ArrayList<>(uids.size());
                     for (String uid : uids) {
-                        if (!currentUser.hasReviewedProject(uid)) {
+                        if (!currentUser.hasReviewedProject(uid) && !currentUser.getProjectsOwned().contains(uid)) {
                             pendingProjects.add(uid);
                         }
                     }
