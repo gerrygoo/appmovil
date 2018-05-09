@@ -317,9 +317,12 @@ public class ProfileFrag extends Fragment {
         for(int i=0;i<numberOfLines;i++){
             View et = ll.getChildAt(i);
             EditText s = (EditText)et;
-            if(!s.getText().toString().isEmpty()){
-                user.addSkill(s.getText().toString());
+            if (s !=null) {
+                if(!s.getText().toString().isEmpty()){
+                    user.addSkill(s.getText().toString());
+                }
             }
+
         }
 
         final ProgressBar bar = getActivity().findViewById(R.id.mainProgress);
